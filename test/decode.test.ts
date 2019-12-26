@@ -1,4 +1,5 @@
 import { Decoder } from '../src/decoder';
+import * as fc from 'fast-check';
 
 describe('Decode', () => {
   it('decodes numbers', () => {
@@ -25,9 +26,11 @@ describe('Decode', () => {
   });
 
   it('decodes literals', () => {
-    const res = Decoder.literal('JACK').decode('JACK');
+    const success = Decoder.literal('JACK').decode('JACK');
+    const fail = Decoder.literal('JACK').decode('JACKFRUIT');
 
-    expect(res).toEqual({ type: 'OK', value: 'JACK' });
+    expect(success).toEqual({ type: 'OK', value: 'JACK' });
+    expect(fail).toHaveProperty('type', 'FAIL');
   });
 
   it('decodes predicates', () => {

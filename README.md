@@ -1,6 +1,25 @@
-# TSDX Bootstrap
+# Decoder
 
-This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).
+A powerful, well tested, type validator for Typescript.
+
+## Credit
+
+This library is essentially a rewrite of Nvie's (decoders.js)[https://github.com/nvie/decoders]
+with some small changes. decoders.js is also inspired by Elm's decoders.
+
+## Alternatives
+
+- (Joi)[https://github.com/hapijs/joi]. The currently most popular validator for data.
+  While it is useful for Javascript, it's Typescript support is lackluster as
+  it has no way of ensuring that a validator actually adheres to a certain type.
+  This means that on top of writing the validator, you will have to also manually
+  write unit tests to ensure that your validator adheres to your type or interface.
+  This creates way too much boilerplate, or relies on the developer to not make mistakes
+  which defeats the purpose of having static types in the first place
+- (decoders.js)[https://github.com/nvie/decoders]. This library is essentially a
+  carbon copy with a few changes. For one, this library supports parsing literals
+  and secondly this library features a dot syntax for operations such as `map`,
+  `andThen`, which is more how it is conventionally used.
 
 ## Local Development
 
