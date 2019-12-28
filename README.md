@@ -5,7 +5,7 @@ A powerful, well tested, type validator for Typescript.
 ## Credit
 
 This library is essentially a rewrite of Nvie's (decoders.js)[https://github.com/nvie/decoders]
-with some small changes. decoders.js is also inspired by Elm's decoders.
+with some small changes. decoders.js is inspired by Elm's decoders.
 
 ## Alternatives
 
@@ -19,7 +19,7 @@ with some small changes. decoders.js is also inspired by Elm's decoders.
 - (decoders.js)[https://github.com/nvie/decoders]. This library is essentially a
   carbon copy with a few changes. For one, this library supports parsing literals
   and secondly this library features a dot syntax for operations such as `map`,
-  `andThen`, which is more how it is conventionally used.
+  `andThen`.
 
 ## Local Development
 

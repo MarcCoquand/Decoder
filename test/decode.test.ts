@@ -1,51 +1,116 @@
 import { Decoder } from '../src/decoder';
 import * as fc from 'fast-check';
 
-describe('Decode', () => {
+describe('Number decoder', () => {
   it('decodes numbers', () => {
-    const number = Decoder.number.decode(5);
-    const number2 = Decoder.number.decode('5');
-    const notNumber = Decoder.number.decode('hello');
-    expect(number).toEqual({ type: 'OK', value: 5 });
-    expect(number2).toEqual({ type: 'OK', value: 5 });
-    expect(notNumber).toEqual({
-      type: 'FAIL',
-      error: 'Not a number, got hello',
-    });
-  });
-  // TODO: Property based test
-  it('decodes string', () => {
-    const str = Decoder.string.decode('Hello world');
-    expect(str).toEqual({ type: 'OK', value: 'Hello world' });
-  });
+    fc.assert(
+      fc.property(fc.maxSafeInteger(), n => {
+        const res = Decoder.number.run(n);
+        const res2 = Decoder.number.run(`${n}`);
 
+        expect(res).toEqual({ type: 'OK', value: n });
+        expect(res2).toEqual({ type: 'OK', value: n });
+      })
+    );
+  });
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(isNaN(anything));
+        const res = Decoder.number.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('Boolean decoder', () => {
+  it('decodes booleans', () => {
+    fc.assert(
+      fc.property(fc.boolean(), bool => {
+        const res = Decoder.boolean.run(bool);
+        expect(res).toEqual({ type: 'OK', value: bool });
+      })
+    );
+  });
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(typeof anything !== 'boolean');
+        const res = Decoder.boolean.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('String decoder', () => {
+  it('decodes strings', () => {
+    fc.assert(
+      fc.property(fc.string(), str => {
+        const res = Decoder.string.run(str);
+        expect(res).toEqual({ type: 'OK', value: str });
+      })
+    );
+  });
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(typeof anything !== 'string');
+        const res = Decoder.string.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('Array decoder', () => {
   it('decodes arrays', () => {
-    const arr = Decoder.array(Decoder.string).decode(['hi', 'there', 'bah']);
+    fc.assert(
+      fc.property(fc.array(fc.string()), arr => {
+        const res = Decoder.array(Decoder.string).run(arr);
+        expect(res).toEqual({ type: 'OK', value: arr });
+      })
+    );
+  });
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(!Array.isArray(anything));
+        const res = Decoder.array(Decoder.string).run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
 
-    expect(arr).toEqual({ type: 'OK', value: ['hi', 'there', 'bah'] });
+describe('Other decoders', () => {
+  it('decodes nullable', () => {
+    fc.assert(
+      fc.property(fc.option(fc.string()), str => {
+        const res = Decoder.string.nullable().run(str);
+        const res2 = Decoder.string.nullable().run(undefined);
+        const res3 = Decoder.string.nullable().run(null);
+        expect(res).toEqual({ type: 'OK', value: str });
+        expect(res2).toEqual({ type: 'OK', value: null });
+        expect(res3).toEqual({ type: 'OK', value: null });
+      })
+    );
   });
 
   it('decodes literals', () => {
-    const success = Decoder.literal('JACK').decode('JACK');
-    const fail = Decoder.literal('JACK').decode('JACKFRUIT');
+    const success = Decoder.literalString('JACK').run('JACK');
+    const fail = Decoder.literalString('JACK').run('JACKFRUIT');
 
     expect(success).toEqual({ type: 'OK', value: 'JACK' });
     expect(fail).toHaveProperty('type', 'FAIL');
   });
 
   it('decodes predicates', () => {
-    const positiveN = Decoder.number.withPredicate({ predicate: n => n > 0 });
+    const positiveN = Decoder.number.satisfy({ predicate: n => n > 0 });
 
-    expect(positiveN.decode(5)).toEqual({ type: 'OK', value: 5 });
-    expect(positiveN.decode(-5)).toHaveProperty('type', 'FAIL');
-  });
-
-  it('decodes boolean', () => {
-    const success = Decoder.boolean.decode(true);
-    const fail = Decoder.boolean.decode(1);
-
-    expect(success).toEqual({ type: 'OK', value: true });
-    expect(fail).toHaveProperty('type', 'FAIL');
+    expect(positiveN.run(5)).toEqual({ type: 'OK', value: 5 });
+    expect(positiveN.run(-5)).toHaveProperty('type', 'FAIL');
   });
 
   it('decodes either', () => {
@@ -53,9 +118,9 @@ describe('Decode', () => {
     const decoder2 = Decoder.string.map(s => ({ type: 'string', value: s }));
     const orDecoder = decoder1.or(decoder2);
 
-    const strings = orDecoder.decode('hi');
-    const ints = orDecoder.decode(5);
-    const bool = orDecoder.decode(true);
+    const strings = orDecoder.run('hi');
+    const ints = orDecoder.run(5);
+    const bool = orDecoder.run(true);
 
     expect(strings).toEqual({
       type: 'OK',
@@ -66,14 +131,14 @@ describe('Decode', () => {
   });
 
   it('decodes object', () => {
-    const idDecoder = Decoder.number.withPredicate({ predicate: n => n > 0 });
+    const idDecoder = Decoder.number.satisfy({ predicate: n => n > 0 });
     const userDecoder = Decoder.object({ name: Decoder.string, id: idDecoder });
 
-    expect(userDecoder.decode({ name: 'hi', id: 5 })).toEqual({
+    expect(userDecoder.run({ name: 'hi', id: 5 })).toEqual({
       type: 'OK',
       value: { name: 'hi', id: 5 },
     });
-    expect(userDecoder.decode({ name: 'hi', id: -1 })).toHaveProperty(
+    expect(userDecoder.run({ name: 'hi', id: -1 })).toHaveProperty(
       'type',
       'FAIL'
     );

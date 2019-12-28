@@ -1,5 +1,30 @@
 import { Result } from './result';
 
+/**
+ * Decode data and check it's validity using Decoder. Useful when you want to
+ * check that data from clients or other outgoing sources is valid.
+ *
+ * To create a decoder, use one of the primitive decoders provided as a static method.
+ * Then call it's deocde method on the data you want to decode.
+ *
+ * ```
+ * const idDecoder<{id: string}> = Decoder.object({id: Decoder.string})
+ *
+ * idDecoder.decode("2913088") // Failure, must have a field id.
+ *
+ * const result = idDecoder.decode({id: 2913088}) // OK
+ *
+ * // To access the result value
+ * switch(result.type) {
+ *   case "OK":
+ *      doThingWithId(result.value)
+ *   case "FAIL":
+ *      // Or if it fails you can find the reason by accessing error
+ *      throw new Error(result.error)
+ * }
+ * ```
+ *
+ */
 export class Decoder<T> {
   private decoder: (data: any) => Result<T, string>;
 
@@ -19,7 +44,7 @@ export class Decoder<T> {
    * ```
    * const optionalNumber = Decoder.number.nullable()
    *
-   * optionalNumber.decode(null) // OK
+   * optionalNumber.decode(null) // OK, value is null
    * optionalNumber.decode(undefined) // OK, value is null
    * optionalNumber.decode(5) // OK, value is 5
    * optionalNumber.decode('hi') // FAIL
@@ -34,7 +59,7 @@ export class Decoder<T> {
     });
 
   /**
-   * Sets a default value to the decoder.
+   * Sets a default value to the decoder if it fails.
    *
    * ```
    * const nrDecoder = Decoder.number.withDefault(0)
@@ -51,11 +76,16 @@ export class Decoder<T> {
     });
 
   /**
-   * Add an extra predicate to the decoder. Optionally you can also add a custom
-   * error message which gets shown in case of failure.
+   * Add an extra predicate to the decoder.
+   *
+   * @param {function} predicate A predicate function to run on the decoded value
+   * @param {function} failureMessage Optional failure message to run in case the
+   *    predicate fails. Provides the data that the predicate checked.
+   *
+   * Example:
    *
    * ```
-   * const naturalNumber = Decoder.number.withPredicate({
+   * const naturalNumber = Decoder.number.satisfy({
    *  predicate: n => n>0
    *  failureMessage: data => `data is not a natural number > 0, it is: ${data}`
    * })
@@ -63,7 +93,7 @@ export class Decoder<T> {
    * naturalNumber.decode(-1) // FAIL
    * ```
    */
-  withPredicate = ({
+  satisfy = ({
     predicate,
     failureMessage,
   }: {
@@ -89,14 +119,18 @@ export class Decoder<T> {
 
   /**
    * Attempt two decoders.
+   *
+   * Example:
    * ```
    * type Names = "Jack" | "Sofia"
    * const enums: Decoder<Names> = Decoder.literal("Jack").or(Decoder.literal("Sofia"))
+   *
+   * enums.decode("Jack") // OK
+   * enums.decode("Sofia") // OK
+   * enums.decode("Josefine") // Fail
    * ```
    */
   or = <S>(decoder: Decoder<S>): Decoder<T | S> =>
-    // We cast Result<T,string> | Result<S, string> to
-    // Result<T | S, string>
     new Decoder((((data: any) => {
       const res1 = this.decoder(data);
       switch (res1.get.type) {
@@ -113,16 +147,57 @@ export class Decoder<T> {
               );
           }
       }
+      // We cast Result<T,string> | Result<S, string> to
+      // Result<T | S, string>
     }) as unknown) as (data: any) => Result<T | S, string>);
 
   private constructor(decoder: (data: any) => Result<T, string>) {
     this.decoder = decoder;
   }
 
-  decode = (data: any) => {
+  /**
+   * Run a decoder on data. The result is a [discriminated union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions). In order to
+   * access the result you must explicitly handle the failure case with a switch.
+   *
+   * Example:
+   *
+   * ```
+   * const userCredentials: Decoder<Credentials> = Decoder.object({...})
+   *
+   * //... Somewhere else
+   * const result = userCredentials.decode(request.query)
+   * switch(result.type) {
+   *    case "OK":
+   *       login(result.value)
+   *    case "FAIL":
+   *        throw new Error(result.error)
+   * }
+   * ```
+   */
+  run = (data: any) => {
     return this.decoder(data).get;
   };
 
+  /**
+   * Create decoders that are dependent on previous results.
+   *
+   * Example:
+   *
+   * ```
+   * const version = Decoder.object({
+   *  version: Decoder.literalNumber(0).or(Decoder.literalNumber(1)),
+   * });
+   * const api = ({ version }: { version: 0 | 1 }): Decoder<{...}> => {
+   *   switch (version) {
+   *      case 0:
+   *        return myFirstDecoder;
+   *      case 1:
+   *        return mySecondDecoder;
+   * }
+   * };
+   * const versionedApi = version.andThen(api);
+   * ```
+   */
   andThen = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S> =>
     new Decoder(data => {
       const result = this.decoder(data);
@@ -155,10 +230,10 @@ export class Decoder<T> {
    * parsing (discriminated) unions.
    * ```
    * type Names = "Jack" | "Sofia"
-   * const enums: Decoder<Names> = Decoder.literal("Jack").or(Decoder.literal("Sofia"))
+   * const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
    * ```
    */
-  public static literal = <T extends string>(str: T): Decoder<T> =>
+  public static literalString = <T extends string>(str: T): Decoder<T> =>
     new Decoder(data => {
       const result = Decoder.string.decoder(data);
       switch (result.get.type) {
@@ -170,6 +245,18 @@ export class Decoder<T> {
           return Result.fail(result.get.error);
       }
     });
+  public static literalNumber = <T extends number>(number: T): Decoder<T> =>
+    new Decoder(data => {
+      const result = Decoder.number.decoder(data);
+      switch (result.get.type) {
+        case 'OK':
+          if (result.get.value === number)
+            return (Result.ok(number) as unknown) as Result<T, string>;
+          else return Result.fail(`number must be ${number}`);
+        case 'FAIL':
+          return Result.fail(result.get.error);
+      }
+    });
 
   public static string: Decoder<string> = new Decoder((data: any) =>
     typeof data === 'string'
@@ -177,18 +264,50 @@ export class Decoder<T> {
       : Result.fail(`Not a string, got ${data}`)
   );
 
-  public static array = <T>(of: Decoder<T>): Decoder<T[]> =>
+  /**
+   * Create a decoder that always fails, useful in conjunction with andThen.
+   */
+  public static fail = <T>(message: string): Decoder<T> =>
+    new Decoder(() => Result.fail(message));
+
+  /**
+   * Create a decoder that always suceeds, useful in conjunction with andThen
+   */
+  public static ok = <T>(value: T): Decoder<T> =>
+    new Decoder(() => Result.ok(value));
+
+  /**
+   * Create an array decoder given a decoder for the elements.
+   */
+  public static array = <T>(decoder: Decoder<T>): Decoder<T[]> =>
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
-        return Result.merge(data.map(item => of.decoder(item)));
+        return Result.merge(data.map(item => decoder.decoder(item)));
       } else return Result.fail(`Not an array: ${data}`);
     });
 
+  /**
+   * Create a decoder for booleans
+   *
+   * Decoder.boolean.decode(true) // succeeds
+   * Decoder.boolean.decode(1) // fails
+   */
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
     else return Result.fail(`Not a boolean: ${data}`);
   });
 
+  /**
+   * Decode a specific field in an object using a given decoder.
+   *
+   * ```
+   * const versionDecoder = Decoder.field("version", Decoder.number)
+   *
+   * versionDecoder.decode({version: 5}) // OK
+   * versionDecoder.decode({name: "hi"}) // fail
+   * ```
+   *
+   */
   public static field = <T>(
     fieldName: string,
     decoder: Decoder<T>
@@ -201,7 +320,28 @@ export class Decoder<T> {
       }
     });
 
-  // Object is a mapped type.
+  /**
+   * Create a decoder for an object T. Will currently go through each field and
+   * collect all the errors but in the future it might fail on first.
+   *
+   * @param object [Mapped type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
+   *   an object containing only decoders for each field. For example
+   *    `{name: Decoder.string}`
+   *
+   * ```
+   * interface User {
+   *    name: string
+   *    email: string
+   * }
+   *
+   * // typechecks
+   * const decodeUser<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
+   *
+   * // will not typecheck, object must have the same field names as user and
+   * // only contain decoders.
+   * const decodeUser<User> = Decoder.object({nem: 'Hi'})
+   * ```
+   */
   public static object = <T>(
     object: { [P in keyof T]: Decoder<T[P]> }
   ): Decoder<T> =>
@@ -212,7 +352,7 @@ export class Decoder<T> {
         let obj: any = {};
         const errors = keyValue.reduce((errors, c) => {
           const [key, decoder] = c;
-          const result = decoder.decode(data[key]);
+          const result = decoder.run(data[key]);
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
