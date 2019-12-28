@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.4.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -25,7 +25,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "decoders",
+  "name": "elm-decoders",
   "author": "Marc Coquand",
   "module": "dist/decoders.esm.js",
   "devDependencies": {
