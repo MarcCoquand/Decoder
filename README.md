@@ -277,7 +277,7 @@ versionDecoder.run({version: 5}) // OK
 versionDecoder.run({name: "hi"}) // fail
 ```
 
-## `public static object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`
+### `public static object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`
 
 Create a decoder for an object T. Will currently go through each field and
 collect all the errors but in the future it might fail on first.
