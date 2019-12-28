@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.3",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -8,10 +8,10 @@
   ],
   "scripts": {
     "start": "tsdx watch",
-    "build": "tsdx build",
+    "build": "tsdx build -i src/decoder.ts",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "tsdx build"
+    "prepare": "tsdx build -i src/decoder.ts"
   },
   "peerDependencies": {},
   "husky": {

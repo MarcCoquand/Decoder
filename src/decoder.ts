@@ -10,9 +10,9 @@ import { Result } from './result';
  * ```
  * const idDecoder<{id: string}> = Decoder.object({id: Decoder.string})
  *
- * idDecoder.decode("2913088") // Failure, must have a field id.
+ * idDecoder.run("2913088") // Failure, must have a field id.
  *
- * const result = idDecoder.decode({id: 2913088}) // OK
+ * const result = idDecoder.run({id: 2913088}) // OK
  *
  * // To access the result value
  * switch(result.type) {
@@ -44,10 +44,10 @@ export class Decoder<T> {
    * ```
    * const optionalNumber = Decoder.number.nullable()
    *
-   * optionalNumber.decode(null) // OK, value is null
-   * optionalNumber.decode(undefined) // OK, value is null
-   * optionalNumber.decode(5) // OK, value is 5
-   * optionalNumber.decode('hi') // FAIL
+   * optionalNumber.run(null) // OK, value is null
+   * optionalNumber.run(undefined) // OK, value is null
+   * optionalNumber.run(5) // OK, value is 5
+   * optionalNumber.run('hi') // FAIL
    *```
    */
   nullable = (): Decoder<T | null> =>
@@ -64,8 +64,8 @@ export class Decoder<T> {
    * ```
    * const nrDecoder = Decoder.number.withDefault(0)
    *
-   * nrDecoder.decode(5) // OK 5
-   * nrDecoder.decoder('hi') // OK 0
+   * nrDecoder.run(5) // OK 5
+   * nrDecoder.run('hi') // OK 0
    * ```
    */
   withDefault = <E>(value: T | E) =>
@@ -89,8 +89,8 @@ export class Decoder<T> {
    *  predicate: n => n>0
    *  failureMessage: data => `data is not a natural number > 0, it is: ${data}`
    * })
-   * naturalNumber.decode(5) // OK, 5
-   * naturalNumber.decode(-1) // FAIL
+   * naturalNumber.run(5) // OK, 5
+   * naturalNumber.run(-1) // FAIL
    * ```
    */
   satisfy = ({
@@ -125,9 +125,9 @@ export class Decoder<T> {
    * type Names = "Jack" | "Sofia"
    * const enums: Decoder<Names> = Decoder.literal("Jack").or(Decoder.literal("Sofia"))
    *
-   * enums.decode("Jack") // OK
-   * enums.decode("Sofia") // OK
-   * enums.decode("Josefine") // Fail
+   * enums.run("Jack") // OK
+   * enums.run("Sofia") // OK
+   * enums.run("Josefine") // Fail
    * ```
    */
   or = <S>(decoder: Decoder<S>): Decoder<T | S> =>
@@ -165,7 +165,7 @@ export class Decoder<T> {
    * const userCredentials: Decoder<Credentials> = Decoder.object({...})
    *
    * //... Somewhere else
-   * const result = userCredentials.decode(request.query)
+   * const result = userCredentials.run(request.query)
    * switch(result.type) {
    *    case "OK":
    *       login(result.value)
@@ -245,6 +245,15 @@ export class Decoder<T> {
           return Result.fail(result.get.error);
       }
     });
+
+  /**
+   * Decodes the exact number and sets it to a number literal type. Useful for
+   * parsing (discriminated) unions.
+   * ```
+   * type Versions = Decoder<1 | 2>
+   * const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
+   * ```
+   */
   public static literalNumber = <T extends number>(number: T): Decoder<T> =>
     new Decoder(data => {
       const result = Decoder.number.decoder(data);
@@ -258,6 +267,14 @@ export class Decoder<T> {
       }
     });
 
+  /**
+   * Decodes a string.
+   *
+   * ```
+   * Decoder.string.run('hi') // OK
+   * Decoder.string.run(5) // Fail
+   * ```
+   */
   public static string: Decoder<string> = new Decoder((data: any) =>
     typeof data === 'string'
       ? Result.ok(data)
@@ -278,6 +295,11 @@ export class Decoder<T> {
 
   /**
    * Create an array decoder given a decoder for the elements.
+   *
+   * ```
+   * Decoder.array(Decoder.string).run(['hello','world']) // OK
+   * Decoder.array(Decoder.string).run(5) // Fail
+   * ```
    */
   public static array = <T>(decoder: Decoder<T>): Decoder<T[]> =>
     new Decoder((data: any) => {
@@ -287,10 +309,12 @@ export class Decoder<T> {
     });
 
   /**
-   * Create a decoder for booleans
+   * Create a decoder for booleans.
    *
-   * Decoder.boolean.decode(true) // succeeds
-   * Decoder.boolean.decode(1) // fails
+   * ```
+   * Decoder.boolean.run(true) // succeeds
+   * Decoder.boolean.run(1) // fails
+   * ```
    */
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
@@ -303,8 +327,8 @@ export class Decoder<T> {
    * ```
    * const versionDecoder = Decoder.field("version", Decoder.number)
    *
-   * versionDecoder.decode({version: 5}) // OK
-   * versionDecoder.decode({name: "hi"}) // fail
+   * versionDecoder.run({version: 5}) // OK
+   * versionDecoder.run({name: "hi"}) // fail
    * ```
    *
    */
