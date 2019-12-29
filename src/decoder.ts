@@ -39,26 +39,6 @@ export class Decoder<T> {
     new Decoder(data => this.decoder(data).map(res => mapFunction(res)));
 
   /**
-   * Turns a decoder into a nullable one. For example:
-   *
-   * ```
-   * const optionalNumber = Decoder.number.nullable()
-   *
-   * optionalNumber.run(null) // OK, value is null
-   * optionalNumber.run(undefined) // OK, value is null
-   * optionalNumber.run(5) // OK, value is 5
-   * optionalNumber.run('hi') // FAIL
-   *```
-   */
-  nullable = (): Decoder<T | null> =>
-    new Decoder(data => {
-      if (data === null || data === undefined) return Result.ok(null);
-      else {
-        return this.decoder(data);
-      }
-    });
-
-  /**
    * Sets a default value to the decoder if it fails.
    *
    * ```
@@ -110,7 +90,7 @@ export class Decoder<T> {
           } else {
             if (failureMessage !== undefined)
               return Result.fail(failureMessage(data));
-            else return Result.fail(`Predicate failed on ${data}`);
+            else return Result.fail(`Predicate failed`);
           }
         case 'FAIL':
           return result;
@@ -210,18 +190,50 @@ export class Decoder<T> {
     });
 
   /**
-   * Parses data and casts it to number.
-   * It will succeed on '5' and 5
+   * A decoder that accepts numbers. It will succeed on both string numbers and
+   * numbers.
+   *
+   * Example:
+   *
+   * ```
+   * Decoder.number.run(5) // OK
+   * Decoder.number.run('5') // OK
+   * Decoder.number.run('hi') // FAIL
+   * ```
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
     if (isNaN(data)) {
-      return Result.fail(`Not a number, got ${data}`);
+      return Result.fail(`Not a number`);
     } else if (typeof data === 'string') {
       return Result.ok(parseInt(data));
     } else if (typeof data === 'number') {
       return Result.ok(data);
     } else {
-      return Result.fail(`Not a number, got ${data}`);
+      return Result.fail(`Not a number`);
+    }
+  });
+
+  /**
+   * A decoder that accepts undefined and null. Useful in conjunction with other
+   * decoders.
+   *
+   * Example:
+   *
+   * ```
+   * Decoder.null.run(null) // OK, value is null
+   * Decoder.null.run(undefined) // OK, value is null
+   * Decoder.null.run(5) // FAIL, value is not null or undefined
+   *
+   * const optionalNumberDecoder = Decoder.number.or(Decoder.null)
+   * optionalNumberDecoder.run(5) // OK
+   * optionalNumberDecoder.run(undefined) // OK
+   * optionalNumberDecoder.run('hi') // FAIL
+   *```
+   */
+  public static null: Decoder<null> = new Decoder(data => {
+    if (data === null || data === undefined) return Result.ok(null);
+    else {
+      return Result.fail(`Not null or undefined`);
     }
   });
 
@@ -240,7 +252,7 @@ export class Decoder<T> {
         case 'OK':
           if (result.get.value === str)
             return (Result.ok(str) as unknown) as Result<T, string>;
-          else return Result.fail(`String must be ${str}`);
+          else return Result.fail(`String is not ${str}`);
         case 'FAIL':
           return Result.fail(result.get.error);
       }
@@ -261,7 +273,7 @@ export class Decoder<T> {
         case 'OK':
           if (result.get.value === number)
             return (Result.ok(number) as unknown) as Result<T, string>;
-          else return Result.fail(`number must be ${number}`);
+          else return Result.fail(`Number is not ${number}`);
         case 'FAIL':
           return Result.fail(result.get.error);
       }
@@ -276,9 +288,7 @@ export class Decoder<T> {
    * ```
    */
   public static string: Decoder<string> = new Decoder((data: any) =>
-    typeof data === 'string'
-      ? Result.ok(data)
-      : Result.fail(`Not a string, got ${data}`)
+    typeof data === 'string' ? Result.ok(data) : Result.fail(`Not a string`)
   );
 
   /**
@@ -305,7 +315,7 @@ export class Decoder<T> {
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
         return Result.merge(data.map(item => decoder.decoder(item)));
-      } else return Result.fail(`Not an array: ${data}`);
+      } else return Result.fail(`Not an array`);
     });
 
   /**
@@ -318,7 +328,7 @@ export class Decoder<T> {
    */
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
-    else return Result.fail(`Not a boolean: ${data}`);
+    else return Result.fail(`Not a boolean`);
   });
 
   /**
@@ -340,7 +350,7 @@ export class Decoder<T> {
       if (typeof data === 'object' && data !== null) {
         return decoder.decoder(data[fieldName]);
       } else {
-        return Result.fail(`Data is not an object, got: ${data}`);
+        return Result.fail(`Data is not an object`);
       }
     });
 
@@ -390,7 +400,7 @@ export class Decoder<T> {
 
         return Result.fail(`Failed to parse, got errors: ${errors.join('\n')}`);
       } else {
-        return Result.fail(`Not an object, got: ${data}`);
+        return Result.fail(`Not an object`);
       }
     });
 }

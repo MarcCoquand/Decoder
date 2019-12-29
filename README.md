@@ -28,25 +28,7 @@ import {Decoder} from 'elm-decoders'
   - [Install](#install)
   - [Motivation](#motivation)
   - [Tutorial](#tutorial)
-  - [API Docs Methods:](#api-docs-methods-)
-    - [`map = <S>(mapFunction: (arg: T) => S): Decoder<S>`](#-map----s--mapfunction---arg--t-----s---decoder-s--)
-    - [`nullable = (): Decoder<T | null>`](#-nullable-------decoder-t---null--)
-    - [`withDefault = <E>(value: T | E) => Decoder<T | E>`](#-withdefault----e--value--t---e-----decoder-t---e--)
-    - [`satisfy = ({predicate, failureMessage,}: {predicate: (arg: T) => boolean; failureMessage?: (attemptedData: any) => string;}): Decoder<T>`](#-satisfy-----predicate--failuremessage-----predicate---arg--t-----boolean--failuremessage----attempteddata--any-----string-----decoder-t--)
-    - [`or = <S>(decoder: Decoder<S>): Decoder<T | S>`](#-or----s--decoder--decoder-s----decoder-t---s--)
-    - [`run = (data: any): {type: "OK": value: T} | {type: "FAIL", error: string}`](#-run----data--any----type---ok---value--t-----type---fail---error--string--)
-    - [`andThen = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S>`](#-andthen----s--dependentdecoder---res--t-----decoder-s----decoder-s--)
-    - [API Static methods](#api-static-methods)
-    - [`number: Decoder<number>`](#-number--decoder-number--)
-    - [`literalString = <T extends string>(str: T): Decoder<T>`](#-literalstring----t-extends-string--str--t---decoder-t--)
-    - [`literalNumber = <T extends number>(number: T): Decoder<T>`](#-literalnumber----t-extends-number--number--t---decoder-t--)
-    - [`string: Decoder<string> = new Decoder((data: any)`](#-string--decoder-string----new-decoder--data--any--)
-    - [`fail = <T>(message: string): Decoder<T>`](#-fail----t--message--string---decoder-t--)
-    - [`ok = <T>(value: T): Decoder<T>`](#-ok----t--value--t---decoder-t--)
-    - [`array = <T>(decoder: Decoder<T>): Decoder<T[]>`](#-array----t--decoder--decoder-t----decoder-t----)
-    - [`boolean: Decoder<boolean>`](#-boolean--decoder-boolean--)
-    - [`field = <T>(fieldName: string, decoder: Decoder<T>): Decoder<T>`](#-field----t--fieldname--string--decoder--decoder-t----decoder-t--)
-    - [`object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`](#-object----t--object-----p-in-keyof-t---decoder-t-p-------decoder-t--)
+  - [API Docs](#api-docs)
   - [Credit](#credit)
   - [Alternatives](#alternatives)
   - [Local Development](#local-development)
@@ -136,33 +118,32 @@ const intSetDecoder: Decoder<Set<number>> = Decoder.array(Decoder.number).map(nu
 This was a brief introduction. From here, please check the API documentation
 to find out more what you can do and try it for yourself!
 
-## API Docs Methods:
+## API Docs
 
-### `map = <S>(mapFunction: (arg: T) => S): Decoder<S>`
+### **Method** `myDecoder.map`
 
-Transform a decoder. Useful for narrowing data types. For example:
+`map: <S>(mapFunction: (arg: T) => S) => Decoder<S>`
+
+Create a new, transformed, decoder. Useful for creating new decoders based on the
+primitive decoders.
+
+Example:
 
 ```
 const setDecoder: Decoder<Set<number>> =
      Decoder.array(Decoder.number).map(numberArray => new Set(numberArray))
+
+setDecoder.run([1,2,3]) //OK, Set([1,2,3])
+setDecoder.run('hi') // FAIL, input is not an array
 ```
 
-### `nullable = (): Decoder<T | null>`
+### **Method** `myDecoder.withDefault`
 
-Turns a decoder into a nullable one. For example:
-
-```
-const optionalNumber = Decoder.number.nullable()
-
-optionalNumber.run(null) // OK, value is null
-optionalNumber.run(undefined) // OK, value is null
-optionalNumber.run(5) // OK, value is 5
-optionalNumber.run('hi') // FAIL
-```
-
-### `withDefault = <E>(value: T | E) => Decoder<T | E>`
+`withDefault: <E>(value: T | E) => Decoder<T | E>`
 
 Sets a default value to the decoder if it fails.
+
+Example:
 
 ```
 const nrDecoder = Decoder.number.withDefault(0)
@@ -171,7 +152,15 @@ nrDecoder.run(5) // OK 5
 nrDecoder.run('hi') // OK 0
 ```
 
-### `satisfy = ({predicate, failureMessage,}: {predicate: (arg: T) => boolean; failureMessage?: (attemptedData: any) => string;}): Decoder<T>`
+### **Method** `myDecoder.satisfy`
+
+```
+satisfy: (
+    {predicate, failureMessage}: {
+        predicate: (arg: T) => boolean;
+        failureMessage?: (attemptedData: any) => string;}
+    ) => Decoder<T>
+```
 
 Add an extra predicate to the decoder.
 
@@ -186,9 +175,13 @@ naturalNumber.run(5) // OK, 5
 naturalNumber.run(-1) // FAIL
 ```
 
-### `or = <S>(decoder: Decoder<S>): Decoder<T | S>`
+### **Method** `myDecoder.or`
 
-Attempt two decoders.
+```
+or : <S>(decoder: Decoder<S>) => Decoder<T | S>`
+```
+
+Attempt the first decoder, if it fails, attempt the second one.
 
 Example:
 
@@ -201,7 +194,11 @@ enums.run("Sofia") // OK
 enums.run("Josefine") // Fail
 ```
 
-### `run = (data: any): {type: "OK": value: T} | {type: "FAIL", error: string}`
+### **Method** `myDecoder.run`
+
+```
+run: (data: any) => {type: "OK": value: T} | {type: "FAIL", error: string}
+```
 
 Run a decoder on data. The result is a [discriminated union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions). In order to
 access the result you must explicitly handle the failure case with a switch.
@@ -221,7 +218,11 @@ switch(result.type) {
 }
 ```
 
-### `andThen = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S>`
+### **Method** `myDecoder.andThen`
+
+```
+andThen: <S>(dependentDecoder: (res: T) => Decoder<S>) => Decoder<S>
+```
 
 Create decoders that are dependent on previous results.
 
@@ -242,71 +243,131 @@ const api = ({ version }: { version: 0 | 1 }): Decoder<{...}> => {
 const versionedApi = version.andThen(api);
 ```
 
-### API Static methods
+### `Decoder.null: Decoder<null>`
 
-### `number: Decoder<number>`
+A decoder that accepts undefined and null. Useful in conjunction with other
+decoders.
 
-Parses data and casts it to number.
-It will succeed on '5' and 5
+Example:
 
-### `literalString = <T extends string>(str: T): Decoder<T>`
+```
+Decoder.null.run(null) // OK, value is null
+Decoder.null.run(undefined) // OK, value is null
+Decoder.null.run(5) // FAIL, value is not null or undefined
+
+const optionalNumberDecoder = Decoder.number.or(Decoder.null)
+optionalNumberDecoder.run(5) // OK
+optionalNumberDecoder.run(undefined) // OK
+optionalNumberDecoder.run('hi') // FAIL
+```
+
+### `Decoder.number: Decoder<number>`
+
+A decoder that accepts numbers. It will succeed on both string numbers and
+numbers.
+
+Example:
+
+```
+Decoder.number.run(5) // OK
+Decoder.number.run('5') // OK
+Decoder.number.run('hi') // FAIL
+```
+
+### `Decoder.literalString`
+
+```
+literalString: <T extends string>(str: T) => Decoder<T>
+```
 
 Decodes the exact string and sets it to a string literal type. Useful for
 parsing (discriminated) unions.
+
+Example:
 
 ```
 type Names = "Jack" | "Sofia"
 const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
 ```
 
-### `literalNumber = <T extends number>(number: T): Decoder<T>`
+### `Decoder.literalNumber`
+
+```
+literalNumber: <T extends number>(number: T) => Decoder<T>
+```
 
 Decodes the exact number and sets it to a number literal type. Useful for
 parsing (discriminated) unions.
+
+Example:
 
 ```
 type Versions = Decoder<1 | 2>
 const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
 ```
 
-### `string: Decoder<string> = new Decoder((data: any)`
+### `Decoder.string: Decoder<string>`
 
 Decodes a string.
+
+Example:
 
 ```
 Decoder.string.run('hi') // OK
 Decoder.string.run(5) // Fail
 ```
 
-### `fail = <T>(message: string): Decoder<T>`
+### `Decoder.fail`
+
+```
+fail: <T>(message: string) => Decoder<T>
+```
 
 Create a decoder that always fails, useful in conjunction with andThen.
 
-### `ok = <T>(value: T): Decoder<T>`
+### `Decoder.ok`
+
+```
+ok: <T>(value: T) => Decoder<T>`
+```
 
 Create a decoder that always suceeds, useful in conjunction with andThen
 
-### `array = <T>(decoder: Decoder<T>): Decoder<T[]>`
+### `Decoder.array`
+
+```
+array: <T>(decoder: Decoder<T>) => Decoder<T[]>
+```
 
 Create an array decoder given a decoder for the elements.
+
+Example:
 
 ```
 Decoder.array(Decoder.string).run(['hello','world']) // OK
 Decoder.array(Decoder.string).run(5) // Fail
 ```
 
-### `boolean: Decoder<boolean>`
+### `Decoder.boolean: Decoder<boolean>`
 
 A decoder for booleans.
+
+Example:
 
 ```
 Decoder.boolean.run(true) // succeeds
 Decoder.boolean.run(1) // fails
 ```
 
-### `field = <T>(fieldName: string, decoder: Decoder<T>): Decoder<T>`
+### `Decoder.field`
+
+```
+field: <T>(fieldName: string, decoder: Decoder<T>) => Decoder<T>
+```
 
 Decode a specific field in an object using a given decoder.
+
+Example:
 
 ```
 const versionDecoder = Decoder.field("version", Decoder.number)
@@ -315,7 +376,11 @@ versionDecoder.run({version: 5}) // OK
 versionDecoder.run({name: "hi"}) // fail
 ```
 
-### `object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`
+### `Decoder.object`
+
+```
+object: <T>(object: { [P in keyof T]: Decoder<T[P]> }) => Decoder<T>
+```
 
 Create a decoder for an object T. Will currently go through each field and
 collect all the errors but in the future it might fail on first.
@@ -323,6 +388,8 @@ collect all the errors but in the future it might fail on first.
 object is a [Mapped type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
 an object containing only decoders for each field. For example
 `{name: Decoder.string}` is a valid `object`.
+
+Example:
 
 ```
 interface User {

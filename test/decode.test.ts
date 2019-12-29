@@ -86,16 +86,12 @@ describe('Array decoder', () => {
 
 describe('Other decoders', () => {
   it('decodes nullable', () => {
-    fc.assert(
-      fc.property(fc.option(fc.string()), str => {
-        const res = Decoder.string.nullable().run(str);
-        const res2 = Decoder.string.nullable().run(undefined);
-        const res3 = Decoder.string.nullable().run(null);
-        expect(res).toEqual({ type: 'OK', value: str });
-        expect(res2).toEqual({ type: 'OK', value: null });
-        expect(res3).toEqual({ type: 'OK', value: null });
-      })
-    );
+    const res = Decoder.null.run('value');
+    const res2 = Decoder.null.run(undefined);
+    const res3 = Decoder.null.run(null);
+    expect(res).toHaveProperty('type', 'FAIL');
+    expect(res2).toEqual({ type: 'OK', value: null });
+    expect(res3).toEqual({ type: 'OK', value: null });
   });
 
   it('decodes literals', () => {
