@@ -416,10 +416,10 @@ with some small changes. decoders.js is inspired by Elm's decoders.
   write unit tests to ensure that your validator adheres to your type or interface.
   This creates way too much boilerplate, or relies on the developer to not make mistakes
   which defeats the purpose of having static types in the first place
-- [decoders.js](https://github.com/nvie/decoders). This library is essentially a
-  carbon copy with a few changes. For one, this library supports parsing literals
-  and secondly this library features a dot syntax for operations such as `map`,
-  `andThen`.
+- [decoders.js](https://github.com/nvie/decoders). This library is a rewrite
+  with a few changes and no dependencies. For one, this library supports
+  parsing literals and secondly this library features a dot syntax for
+  operations such as `map`, `andThen`.
 
 ## Local Development
 
