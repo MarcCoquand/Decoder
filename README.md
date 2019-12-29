@@ -38,18 +38,22 @@ import {Decoder} from 'elm-decoders'
 
 ## Motivation
 
-When using Typescript, there is very little we can do to guarantee that the
-incoming data is correct. This means that errors can occur anywhere in the
-code, introducing odd errors and unexpected behavior with no way of knowing
-where the error came from. By instead validating our data at the start (for
+Typescript is great, however it provides no tools for checking runtime data.
+This means that we need a tool to check that incoming data follows the
+correct typings. If we do not validate the data, errors can occur anywhere in
+the code, introducing odd behaviors and tracking down where the error comes
+from becomes difficult. By instead validating our data at the start (for
 example when receiving an incoming request), we can handle the error early
 and give better error messages to the developer. This creates a better
-developer experience and making us more confident and productive. It gives us
-stronger guarantees. Another benefit of using Decoders is that you can pick
-the best data model for your problem and convert all incoming data sources to
-fit that model. This makes it easier to write business logic separately from
-the acquisition of the data. Also, by picking the right data model for your
-problem helps with bug reduction and maintainability. Decoders are great for
+developer experience and gives us stronger guarantees that the code works
+correctly.
+
+Another benefit of using Decoders is that you can pick the best
+data model for your problem and convert all incoming data sources to fit that
+model. This makes it easier to write business logic separately from the
+acquisition of the data.
+
+ecoders are great for
 validating and converting data from various sources: Kafka data, request
 bodies or APIs to name a few examples.
 
