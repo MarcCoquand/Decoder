@@ -26,7 +26,7 @@ import { Result } from './result';
  *
  */
 export class Decoder<T> {
-  private decoder: (data: any) => Result<T, string>;
+  private decoder: (data: any) => Result<T, string[]>;
 
   /**
    * Transform a decoder. Useful for narrowing data types. For example:
@@ -89,8 +89,8 @@ export class Decoder<T> {
             return result;
           } else {
             if (failureMessage !== undefined)
-              return Result.fail(failureMessage(data));
-            else return Result.fail(`Predicate failed`);
+              return Result.fail([failureMessage(data)]);
+            else return Result.fail([`Predicate failed`]);
           }
         case 'FAIL':
           return result;
@@ -122,16 +122,14 @@ export class Decoder<T> {
             case 'OK':
               return res2;
             case 'FAIL':
-              return Result.fail(
-                `Failed to parse ${data}, got: ${res2.get.error}, and: ${res1.get.error}`
-              );
+              return Result.fail([res2.get.error, res1.get.error]);
           }
       }
       // We cast Result<T,string> | Result<S, string> to
       // Result<T | S, string>
-    }) as unknown) as (data: any) => Result<T | S, string>);
+    }) as unknown) as (data: any) => Result<T | S, string[]>);
 
-  private constructor(decoder: (data: any) => Result<T, string>) {
+  private constructor(decoder: (data: any) => Result<T, string[]>) {
     this.decoder = decoder;
   }
 
@@ -155,7 +153,14 @@ export class Decoder<T> {
    * ```
    */
   run = (data: any) => {
-    return this.decoder(data).get;
+    const result = this.decoder(data);
+
+    return result.mapError(
+      errors =>
+        `Could not decode data, got error(s):\n${errors.join(
+          '\n'
+        )}. For data: ${data}`
+    ).get;
   };
 
   /**
@@ -185,7 +190,7 @@ export class Decoder<T> {
         case 'OK':
           return dependentDecoder(result.get.value).decoder(data);
         case 'FAIL':
-          return (result as unknown) as Result<S, string>;
+          return new Result({ type: 'FAIL', error: result.get.error });
       }
     });
 
@@ -203,13 +208,13 @@ export class Decoder<T> {
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
     if (isNaN(data)) {
-      return Result.fail(`Not a number`);
+      return Result.fail([`Not a number`]);
     } else if (typeof data === 'string') {
       return Result.ok(parseInt(data));
     } else if (typeof data === 'number') {
       return Result.ok(data);
     } else {
-      return Result.fail(`Not a number`);
+      return Result.fail([`Not a number`]);
     }
   });
 
@@ -233,7 +238,7 @@ export class Decoder<T> {
   public static null: Decoder<null> = new Decoder(data => {
     if (data === null || data === undefined) return Result.ok(null);
     else {
-      return Result.fail(`Not null or undefined`);
+      return Result.fail([`Not null or undefined`]);
     }
   });
 
@@ -251,8 +256,8 @@ export class Decoder<T> {
       switch (result.get.type) {
         case 'OK':
           if (result.get.value === str)
-            return (Result.ok(str) as unknown) as Result<T, string>;
-          else return Result.fail(`String is not ${str}`);
+            return (Result.ok(str) as unknown) as Result<T, string[]>;
+          else return Result.fail([`String is not ${str}`]);
         case 'FAIL':
           return Result.fail(result.get.error);
       }
@@ -272,8 +277,8 @@ export class Decoder<T> {
       switch (result.get.type) {
         case 'OK':
           if (result.get.value === number)
-            return (Result.ok(number) as unknown) as Result<T, string>;
-          else return Result.fail(`Number is not ${number}`);
+            return (Result.ok(number) as unknown) as Result<T, string[]>;
+          else return Result.fail([`Number is not ${number}`]);
         case 'FAIL':
           return Result.fail(result.get.error);
       }
@@ -288,14 +293,14 @@ export class Decoder<T> {
    * ```
    */
   public static string: Decoder<string> = new Decoder((data: any) =>
-    typeof data === 'string' ? Result.ok(data) : Result.fail(`Not a string`)
+    typeof data === 'string' ? Result.ok(data) : Result.fail([`Not a string`])
   );
 
   /**
    * Create a decoder that always fails, useful in conjunction with andThen.
    */
   public static fail = <T>(message: string): Decoder<T> =>
-    new Decoder(() => Result.fail(message));
+    new Decoder(() => Result.fail([message]));
 
   /**
    * Create a decoder that always suceeds, useful in conjunction with andThen
@@ -315,7 +320,7 @@ export class Decoder<T> {
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
         return Result.merge(data.map(item => decoder.decoder(item)));
-      } else return Result.fail(`Not an array`);
+      } else return Result.fail([`Not an array`]);
     });
 
   /**
@@ -328,7 +333,7 @@ export class Decoder<T> {
    */
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
-    else return Result.fail(`Not a boolean`);
+    else return Result.fail([`Not a boolean`]);
   });
 
   /**
@@ -348,9 +353,11 @@ export class Decoder<T> {
   ): Decoder<T> =>
     new Decoder(data => {
       if (typeof data === 'object' && data !== null) {
-        return decoder.decoder(data[fieldName]);
+        return decoder
+          .decoder(data[fieldName])
+          .mapError(error => error.map(str => `Field ${fieldName}: ${str}`));
       } else {
-        return Result.fail(`Data is not an object`);
+        return Result.fail([`Data is not an object`]);
       }
     });
 
@@ -386,21 +393,23 @@ export class Decoder<T> {
         let obj: any = {};
         const errors = keyValue.reduce((errors, c) => {
           const [key, decoder] = c;
-          const result = decoder.run(data[key]);
+          const result = decoder
+            .decoder(data[key])
+            .mapError(strArr => strArr.map(str => `Field ${key}: ${str}`)).get;
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
               return errors;
             case 'FAIL':
-              return [...errors, result.error];
+              return errors.concat(result.error);
           }
         }, [] as string[]);
 
         if (errors.length === 0) return Result.ok(obj as T);
 
-        return Result.fail(`Failed to parse, got errors: ${errors.join('\n')}`);
+        return Result.fail(errors);
       } else {
-        return Result.fail(`Not an object`);
+        return Result.fail([`Not an object`]);
       }
     });
 }
