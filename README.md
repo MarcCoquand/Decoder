@@ -243,7 +243,7 @@ const api = ({ version }: { version: 0 | 1 }): Decoder<{...}> => {
 const versionedApi = version.andThen(api);
 ```
 
-### `Decoder.null: Decoder<null>`
+### **Static Method** `Decoder.null: Decoder<null>`
 
 A decoder that accepts undefined and null. Useful in conjunction with other
 decoders.
@@ -261,7 +261,7 @@ optionalNumberDecoder.run(undefined) // OK
 optionalNumberDecoder.run('hi') // FAIL
 ```
 
-### `Decoder.number: Decoder<number>`
+### **Static Method** `Decoder.number: Decoder<number>`
 
 A decoder that accepts numbers. It will succeed on both string numbers and
 numbers.
@@ -274,7 +274,7 @@ Decoder.number.run('5') // OK
 Decoder.number.run('hi') // FAIL
 ```
 
-### `Decoder.literalString`
+### **Static Method** `Decoder.literalString`
 
 ```
 literalString: <T extends string>(str: T) => Decoder<T>
@@ -290,7 +290,7 @@ type Names = "Jack" | "Sofia"
 const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
 ```
 
-### `Decoder.literalNumber`
+### **Static Method** `Decoder.literalNumber`
 
 ```
 literalNumber: <T extends number>(number: T) => Decoder<T>
@@ -306,7 +306,7 @@ type Versions = Decoder<1 | 2>
 const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
 ```
 
-### `Decoder.string: Decoder<string>`
+### **Static Method** `Decoder.string: Decoder<string>`
 
 Decodes a string.
 
@@ -317,7 +317,7 @@ Decoder.string.run('hi') // OK
 Decoder.string.run(5) // Fail
 ```
 
-### `Decoder.fail`
+### **Static Method** `Decoder.fail`
 
 ```
 fail: <T>(message: string) => Decoder<T>
@@ -325,7 +325,7 @@ fail: <T>(message: string) => Decoder<T>
 
 Create a decoder that always fails, useful in conjunction with andThen.
 
-### `Decoder.ok`
+### **Static Method** `Decoder.ok`
 
 ```
 ok: <T>(value: T) => Decoder<T>`
@@ -333,7 +333,7 @@ ok: <T>(value: T) => Decoder<T>`
 
 Create a decoder that always suceeds, useful in conjunction with andThen
 
-### `Decoder.array`
+### **Static Method** `Decoder.array`
 
 ```
 array: <T>(decoder: Decoder<T>) => Decoder<T[]>
@@ -348,7 +348,7 @@ Decoder.array(Decoder.string).run(['hello','world']) // OK
 Decoder.array(Decoder.string).run(5) // Fail
 ```
 
-### `Decoder.boolean: Decoder<boolean>`
+### **Static Method** `Decoder.boolean: Decoder<boolean>`
 
 A decoder for booleans.
 
@@ -359,7 +359,7 @@ Decoder.boolean.run(true) // succeeds
 Decoder.boolean.run(1) // fails
 ```
 
-### `Decoder.field`
+### **Static Method** `Decoder.field`
 
 ```
 field: <T>(fieldName: string, decoder: Decoder<T>) => Decoder<T>
@@ -376,7 +376,7 @@ versionDecoder.run({version: 5}) // OK
 versionDecoder.run({name: "hi"}) // fail
 ```
 
-### `Decoder.object`
+### **Static Method** `Decoder.object`
 
 ```
 object: <T>(object: { [P in keyof T]: Decoder<T[P]> }) => Decoder<T>
