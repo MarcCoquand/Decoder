@@ -16,6 +16,44 @@ Or
 yarn add elm-decoders
 ```
 
+Then at the top of your file add:
+
+```
+import {Decoder} from 'elm-decoders'
+```
+
+## Table of Content
+
+- [Decoder](#decoder)
+  - [Install](#install)
+  - [Motivation](#motivation)
+  - [Tutorial](#tutorial)
+  - [API Docs Methods:](#api-docs-methods-)
+    - [`map = <S>(mapFunction: (arg: T) => S): Decoder<S>`](#-map----s--mapfunction---arg--t-----s---decoder-s--)
+    - [`nullable = (): Decoder<T | null>`](#-nullable-------decoder-t---null--)
+    - [`withDefault = <E>(value: T | E) => Decoder<T | E>`](#-withdefault----e--value--t---e-----decoder-t---e--)
+    - [`satisfy = ({predicate, failureMessage,}: {predicate: (arg: T) => boolean; failureMessage?: (attemptedData: any) => string;}): Decoder<T>`](#-satisfy-----predicate--failuremessage-----predicate---arg--t-----boolean--failuremessage----attempteddata--any-----string-----decoder-t--)
+    - [`or = <S>(decoder: Decoder<S>): Decoder<T | S>`](#-or----s--decoder--decoder-s----decoder-t---s--)
+    - [`run = (data: any): {type: "OK": value: T} | {type: "FAIL", error: string}`](#-run----data--any----type---ok---value--t-----type---fail---error--string--)
+    - [`andThen = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S>`](#-andthen----s--dependentdecoder---res--t-----decoder-s----decoder-s--)
+    - [API Static methods](#api-static-methods)
+    - [`number: Decoder<number>`](#-number--decoder-number--)
+    - [`literalString = <T extends string>(str: T): Decoder<T>`](#-literalstring----t-extends-string--str--t---decoder-t--)
+    - [`literalNumber = <T extends number>(number: T): Decoder<T>`](#-literalnumber----t-extends-number--number--t---decoder-t--)
+    - [`string: Decoder<string> = new Decoder((data: any)`](#-string--decoder-string----new-decoder--data--any--)
+    - [`fail = <T>(message: string): Decoder<T>`](#-fail----t--message--string---decoder-t--)
+    - [`ok = <T>(value: T): Decoder<T>`](#-ok----t--value--t---decoder-t--)
+    - [`array = <T>(decoder: Decoder<T>): Decoder<T[]>`](#-array----t--decoder--decoder-t----decoder-t----)
+    - [`boolean: Decoder<boolean>`](#-boolean--decoder-boolean--)
+    - [`field = <T>(fieldName: string, decoder: Decoder<T>): Decoder<T>`](#-field----t--fieldname--string--decoder--decoder-t----decoder-t--)
+    - [`object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`](#-object----t--object-----p-in-keyof-t---decoder-t-p-------decoder-t--)
+  - [Credit](#credit)
+  - [Alternatives](#alternatives)
+  - [Local Development](#local-development)
+    - [`npm start` or `yarn start`](#-npm-start--or--yarn-start-)
+    - [`npm run build` or `yarn build`](#-npm-run-build--or--yarn-build-)
+    - [`npm test` or `yarn test`](#-npm-test--or--yarn-test-)
+
 ## Motivation
 
 When using Typescript, there is very little we can do to guarantee that the
@@ -74,8 +112,8 @@ Now we can validate `incomingData` and ensure the data is correct.
 const result = userDecoder.run(incomingData)
 ```
 
-`run` returns a (Discriminated
-union)[https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions],
+`run` returns a [Discriminated
+union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions),
 meaning is returns _either_ `{type: "OK", value: T}` _or_ `{type: "FAIL": error: string}`. This means that we are forced to check if the data received is correct or contains an error. Doing so
 is as simple as a switch case:
 
@@ -100,7 +138,7 @@ to find out more what you can do and try it for yourself!
 
 ## API Docs Methods:
 
-### map = <S>(mapFunction: (arg: T) => S): Decoder<S>`
+### `map = <S>(mapFunction: (arg: T) => S): Decoder<S>`
 
 Transform a decoder. Useful for narrowing data types. For example:
 
@@ -266,7 +304,7 @@ Decoder.boolean.run(true) // succeeds
 Decoder.boolean.run(1) // fails
 ```
 
-### field = <T>(fieldName: string, decoder: Decoder<T>): Decoder<T>
+### `field = <T>(fieldName: string, decoder: Decoder<T>): Decoder<T>`
 
 Decode a specific field in an object using a given decoder.
 
@@ -277,7 +315,7 @@ versionDecoder.run({version: 5}) // OK
 versionDecoder.run({name: "hi"}) // fail
 ```
 
-### `public static object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`
+### `object = <T>(object: { [P in keyof T]: Decoder<T[P]> }): Decoder<T>`
 
 Create a decoder for an object T. Will currently go through each field and
 collect all the errors but in the future it might fail on first.
