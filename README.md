@@ -159,7 +159,7 @@ nrDecoder.run('hi') // OK 0
 satisfy: (
     {predicate, failureMessage}: {
         predicate: (arg: T) => boolean;
-        failureMessage?: (attemptedData: any) => string;}
+        failureMessage?: string;}
     ) => Decoder<T>
 ```
 
@@ -170,7 +170,7 @@ Example:
 ```
 const naturalNumber = Decoder.number.satisfy({
  predicate: n => n>0
- failureMessage: data => `data is not a natural number > 0, it is: ${data}`
+ failureMessage: `Not a natural number > 0`
 })
 naturalNumber.run(5) // OK, 5
 naturalNumber.run(-1) // FAIL

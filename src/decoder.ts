@@ -59,7 +59,7 @@ export class Decoder<T> {
    * Add an extra predicate to the decoder.
    *
    * @param {function} predicate A predicate function to run on the decoded value
-   * @param {function} failureMessage Optional failure message to run in case the
+   * @param {string} failureMessage Optional failure message to run in case the
    *    predicate fails. Provides the data that the predicate checked.
    *
    * Example:
@@ -67,7 +67,7 @@ export class Decoder<T> {
    * ```
    * const naturalNumber = Decoder.number.satisfy({
    *  predicate: n => n>0
-   *  failureMessage: data => `data is not a natural number > 0, it is: ${data}`
+   *  failureMessage: `Not a natural number > 0`
    * })
    * naturalNumber.run(5) // OK, 5
    * naturalNumber.run(-1) // FAIL
@@ -78,7 +78,7 @@ export class Decoder<T> {
     failureMessage,
   }: {
     predicate: (arg: T) => boolean;
-    failureMessage?: (attemptedData: any) => string;
+    failureMessage?: string;
   }): Decoder<T> =>
     new Decoder(data => {
       const result = this.decoder(data);
@@ -89,7 +89,7 @@ export class Decoder<T> {
             return result;
           } else {
             if (failureMessage !== undefined)
-              return Result.fail([failureMessage(data)]);
+              return Result.fail([failureMessage]);
             else return Result.fail([`Predicate failed`]);
           }
         case 'FAIL':
