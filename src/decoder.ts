@@ -251,8 +251,7 @@ export class Decoder<T> {
       const result = Decoder.string.decoder(data);
       switch (result.get.type) {
         case 'OK':
-          if (result.get.value === str)
-            return (Result.ok(str) as unknown) as Result<T, string[]>;
+          if (result.get.value === str) return Result.ok(str);
           else return Result.fail([`String is not ${str}`]);
         case 'FAIL':
           return Result.fail(result.get.error);
@@ -272,8 +271,7 @@ export class Decoder<T> {
       const result = Decoder.number.decoder(data);
       switch (result.get.type) {
         case 'OK':
-          if (result.get.value === number)
-            return (Result.ok(number) as unknown) as Result<T, string[]>;
+          if (result.get.value === number) return Result.ok(number);
           else return Result.fail([`Number is not ${number}`]);
         case 'FAIL':
           return Result.fail(result.get.error);
