@@ -264,14 +264,13 @@ optionalNumberDecoder.run('hi') // FAIL
 
 ### **Static Method** `Decoder.number: Decoder<number>`
 
-A decoder that accepts numbers. It will succeed on both string numbers and
-numbers.
+A decoder that accepts numbers.
 
 Example:
 
 ```
 Decoder.number.run(5) // OK
-Decoder.number.run('5') // OK
+Decoder.number.run('5') // FAIL
 Decoder.number.run('hi') // FAIL
 ```
 
