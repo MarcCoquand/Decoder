@@ -209,10 +209,11 @@ export class Decoder<T> {
   public static number: Decoder<number> = new Decoder((data: any) => {
     if (isNaN(data)) {
       return Result.fail([`Not a number`]);
-    } else if (typeof data === 'string') {
-      return Result.ok(parseInt(data));
     } else if (typeof data === 'number') {
       return Result.ok(data);
+      // isNaN("") returns false while parseInt("") returns NaN...
+    } else if (typeof data === 'string' && !isNaN(parseInt(data))) {
+      return Result.ok(parseInt(data));
     } else {
       return Result.fail([`Not a number`]);
     }
@@ -378,10 +379,14 @@ export class Decoder<T> {
    * // typechecks
    * const decodeUser<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
    *
+   * decodeUser.run({name: "Jenny", email: "fakemail@fake.com"}) // OK
+   * decodeUser.run({nm: "Bad"}) // FAIL
+   *
    * // will not typecheck, object must have the same field names as user and
    * // only contain decoders.
    * const decodeUser<User> = Decoder.object({nem: 'Hi'})
    * ```
+   *
    */
   public static object = <T>(
     object: { [P in keyof T]: Decoder<T[P]> }
@@ -391,22 +396,23 @@ export class Decoder<T> {
         const keyValue = Object.entries(object) as [string, Decoder<unknown>][];
 
         let obj: any = {};
-        const errors = keyValue.reduce((errors, c) => {
-          const [key, decoder] = c;
+        let errors: string[] = [];
+        let i: number;
+        for (i = 0; i < keyValue.length; i++) {
+          const [key, decoder] = keyValue[i];
           const result = decoder
             .decoder(data[key])
             .mapError(strArr => strArr.map(str => `Field ${key}: ${str}`)).get;
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
-              return errors;
+              break;
             case 'FAIL':
-              return errors.concat(result.error);
+              errors.push(...result.error);
+              break;
           }
-        }, [] as string[]);
-
+        }
         if (errors.length === 0) return Result.ok(obj as T);
-
         return Result.fail(errors);
       } else {
         return Result.fail([`Not an object`]);

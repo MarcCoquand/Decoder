@@ -16,7 +16,7 @@ describe('Number decoder', () => {
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
-        fc.pre(isNaN(anything));
+        fc.pre(typeof anything !== 'number' && !isNaN(parseInt(anything)));
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
