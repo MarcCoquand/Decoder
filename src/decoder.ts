@@ -389,7 +389,7 @@ export class Decoder<T> {
    *
    */
   public static object = <T>(
-    object: { [P in keyof T]: Decoder<T[P]> }
+    object: { [K in keyof T]: Decoder<T[K]> }
   ): Decoder<T> =>
     new Decoder((data: any) => {
       if (typeof data === 'object' && data !== null) {
@@ -402,7 +402,9 @@ export class Decoder<T> {
           const [key, decoder] = keyValue[i];
           const result = decoder
             .decoder(data[key])
-            .mapError(strArr => strArr.map(str => `Field ${key}: ${str}`)).get;
+            .mapError(strArr =>
+              strArr.map(str => `Expected field ${key}: ${str}`)
+            ).get;
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
