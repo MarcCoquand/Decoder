@@ -111,23 +111,24 @@ export class Decoder<T> {
    * ```
    */
   or = <S>(decoder: Decoder<S>): Decoder<T | S> =>
-    new Decoder((((data: any) => {
+    new Decoder((data: any) => {
       const res1 = this.decoder(data);
+      let errors: string[] = [];
       switch (res1.get.type) {
         case 'OK':
-          return res1;
+          return Result.ok(res1.get.value);
         case 'FAIL':
           const res2 = decoder.decoder(data);
           switch (res2.get.type) {
             case 'OK':
-              return res2;
+              return Result.ok(res2.get.value);
             case 'FAIL':
-              return Result.fail([res2.get.error, res1.get.error]);
+              errors.push(...res1.get.error);
+              errors.push(...res2.get.error);
+              return Result.fail(errors);
           }
       }
-      // We cast Result<T,string> | Result<S, string> to
-      // Result<T | S, string>
-    }) as unknown) as (data: any) => Result<T | S, string[]>);
+    });
 
   private constructor(decoder: (data: any) => Result<T, string[]>) {
     this.decoder = decoder;
