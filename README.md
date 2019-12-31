@@ -188,7 +188,7 @@ Example:
 
 ```
 type Names = "Jack" | "Sofia"
-const enums: Decoder<Names> = Decoder.literal("Jack").or(Decoder.literal("Sofia"))
+const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
 
 enums.run("Jack") // OK
 enums.run("Sofia") // OK
@@ -401,6 +401,9 @@ interface User {
 // typechecks
 const decodeUser<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
 
+decodeUser.run({name: "Jenny", email: "fakemail@fake.com"}) // OK
+decodeUser.run({nm: "Bad"}) // FAIL
+
 // will not typecheck, object must have the same field names as user and
 // only contain decoders.
 const decodeUser<User> = Decoder.object({nem: 'Hi'})
@@ -420,10 +423,9 @@ with some small changes. decoders.js is inspired by Elm's decoders.
   write unit tests to ensure that your validator adheres to your type or interface.
   This creates way too much boilerplate, or relies on the developer to not make mistakes
   which defeats the purpose of having static types in the first place
-- [decoders.js](https://github.com/nvie/decoders). This library is a rewrite
-  with a few changes and no dependencies. For one, this library supports
-  parsing literals and secondly this library features a dot syntax for
-  operations such as `map`, `andThen`.
+- [decoders.js](https://github.com/nvie/decoders). Features a different syntax but
+  has a similar goal. It also contains two more dependencies compared to this library
+  which has none.
 
 ## Local Development
 

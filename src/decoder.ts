@@ -103,7 +103,7 @@ export class Decoder<T> {
    * Example:
    * ```
    * type Names = "Jack" | "Sofia"
-   * const enums: Decoder<Names> = Decoder.literal("Jack").or(Decoder.literal("Sofia"))
+   * const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
    *
    * enums.run("Jack") // OK
    * enums.run("Sofia") // OK
@@ -157,8 +157,8 @@ export class Decoder<T> {
 
     return result.mapError(
       errors =>
-        `Could not decode data, got error(s):\n${errors.join(
-          '\n'
+        `Could not decode data, got error(s): ${errors.join(
+          ','
         )}. For data: ${data}`
     ).get;
   };
