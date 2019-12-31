@@ -196,27 +196,21 @@ export class Decoder<T> {
     });
 
   /**
-   * A decoder that accepts numbers. It will succeed on both string numbers and
-   * numbers.
+   * A decoder for numbers
    *
    * Example:
    *
    * ```
    * Decoder.number.run(5) // OK
-   * Decoder.number.run('5') // OK
+   * Decoder.number.run('5') // FAIL
    * Decoder.number.run('hi') // FAIL
    * ```
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
-    if (isNaN(data)) {
+    if (isNaN(data) || typeof data !== 'number') {
       return Result.fail([`Not a number`]);
-    } else if (typeof data === 'number') {
-      return Result.ok(data);
-      // isNaN("") returns false while parseInt("") returns NaN...
-    } else if (typeof data === 'string' && !isNaN(parseInt(data))) {
-      return Result.ok(parseInt(data));
     } else {
-      return Result.fail([`Not a number`]);
+      return Result.ok(data);
     }
   });
 

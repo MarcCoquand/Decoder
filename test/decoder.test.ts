@@ -6,17 +6,15 @@ describe('Number decoder', () => {
     fc.assert(
       fc.property(fc.maxSafeInteger(), n => {
         const res = Decoder.number.run(n);
-        const res2 = Decoder.number.run(`${n}`);
 
         expect(res).toEqual({ type: 'OK', value: n });
-        expect(res2).toEqual({ type: 'OK', value: n });
       })
     );
   });
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
-        fc.pre(typeof anything !== 'number' && isNaN(parseInt(anything)));
+        fc.pre(typeof anything !== 'number');
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
