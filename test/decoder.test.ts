@@ -82,7 +82,7 @@ describe('Array decoder', () => {
   });
 });
 
-describe('Other decoders', () => {
+describe('Nullable decoder', () => {
   it('decodes nullable', () => {
     const res = Decoder.null.run('value');
     const res2 = Decoder.null.run(undefined);
@@ -92,6 +92,18 @@ describe('Other decoders', () => {
     expect(res3).toEqual({ type: 'OK', value: null });
   });
 
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(anything !== null && anything !== undefined);
+        const res = Decoder.null.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('Other decoders', () => {
   it('decodes literals', () => {
     const success = Decoder.literalString('JACK').run('JACK');
     const fail = Decoder.literalString('JACK').run('JACKFRUIT');
