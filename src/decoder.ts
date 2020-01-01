@@ -351,7 +351,7 @@ export class Decoder<T> {
           .decoder(data[fieldName])
           .mapError(error => error.map(str => `Field ${fieldName}: ${str}`));
       } else {
-        return Result.fail([`Data is not an object`]);
+        return Result.fail([`Not an object`]);
       }
     });
 
