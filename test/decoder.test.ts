@@ -82,12 +82,10 @@ describe('Array decoder', () => {
   });
 });
 
-describe('Nullable decoder', () => {
-  it('decodes nullable', () => {
-    const res = Decoder.null.run('value');
+describe('Null decoder', () => {
+  it('decodes null and undefined', () => {
     const res2 = Decoder.null.run(undefined);
     const res3 = Decoder.null.run(null);
-    expect(res).toHaveProperty('type', 'FAIL');
     expect(res2).toEqual({ type: 'OK', value: null });
     expect(res3).toEqual({ type: 'OK', value: null });
   });
