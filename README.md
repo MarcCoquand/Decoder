@@ -53,9 +53,8 @@ data model for your problem and convert all incoming data sources to fit that
 model. This makes it easier to write business logic separately from the
 acquisition of the data.
 
-ecoders are great for
-validating and converting data from various sources: Kafka data, request
-bodies or APIs to name a few examples.
+Decoders are great for validating and converting data from various sources:
+Kafka, request bodies or APIs to name a few examples.
 
 ## Tutorial
 
