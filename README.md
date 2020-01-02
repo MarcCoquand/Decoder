@@ -80,7 +80,7 @@ interface User {
 To validate that `incomingData` is a `User`, Decoder provides an `object` primitive.
 
 ```
-import {Decoder} from 'elm-decoder'
+import {Decoder} from 'elm-decoders'
 
 const userDecoder: Decoder<User> = Decoder.object({
     name: Decoder.string,
