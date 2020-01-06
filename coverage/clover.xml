@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1578329419236" clover="3.2.0">
+  <project timestamp="1578329419236" name="All files">
+    <metrics statements="134" coveredstatements="115" conditionals="58" coveredconditionals="43" methods="49" coveredmethods="41" elements="241" coveredelements="199" complexity="0" loc="134" ncloc="134" packages="1" files="2" classes="2"/>
+    <file name="decoder.ts" path="/home/marccoquand/Projects/decoders/src/decoder.ts">
+      <metrics statements="105" coveredstatements="91" conditionals="48" coveredconditionals="37" methods="38" coveredmethods="32"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="28" count="1" type="stmt"/>
+      <line num="38" count="219" type="stmt"/>
+      <line num="39" count="6" type="stmt"/>
+      <line num="51" count="219" type="stmt"/>
+      <line num="52" count="1" type="stmt"/>
+      <line num="53" count="1" type="stmt"/>
+      <line num="54" count="1" type="cond" truecount="1" falsecount="1"/>
+      <line num="55" count="1" type="stmt"/>
+      <line num="76" count="219" type="stmt"/>
+      <line num="77" count="2" type="stmt"/>
+      <line num="78" count="2" type="stmt"/>
+      <line num="83" count="2" type="stmt"/>
+      <line num="84" count="4" type="stmt"/>
+      <line num="86" count="4" type="stmt"/>
+      <line num="88" count="4" type="cond" truecount="2" falsecount="0"/>
+      <line num="89" count="2" type="stmt"/>
+      <line num="91" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="92" count="0" type="stmt"/>
+      <line num="93" count="2" type="stmt"/>
+      <line num="96" count="0" type="stmt"/>
+      <line num="113" count="219" type="stmt"/>
+      <line num="114" count="2" type="stmt"/>
+      <line num="115" count="5" type="stmt"/>
+      <line num="116" count="5" type="stmt"/>
+      <line num="117" count="5" type="stmt"/>
+      <line num="119" count="2" type="stmt"/>
+      <line num="121" count="3" type="stmt"/>
+      <line num="122" count="3" type="stmt"/>
+      <line num="124" count="2" type="stmt"/>
+      <line num="126" count="1" type="stmt"/>
+      <line num="127" count="1" type="stmt"/>
+      <line num="128" count="1" type="stmt"/>
+      <line num="133" count="219" type="stmt"/>
+      <line num="134" count="219" type="stmt"/>
+      <line num="156" count="219" type="stmt"/>
+      <line num="157" count="917" type="stmt"/>
+      <line num="159" count="917" type="stmt"/>
+      <line num="161" count="504" type="stmt"/>
+      <line num="187" count="219" type="stmt"/>
+      <line num="188" count="1" type="stmt"/>
+      <line num="189" count="1" type="stmt"/>
+      <line num="190" count="1" type="stmt"/>
+      <line num="192" count="1" type="stmt"/>
+      <line num="194" count="0" type="stmt"/>
+      <line num="209" count="1" type="stmt"/>
+      <line num="210" count="215" type="cond" truecount="4" falsecount="0"/>
+      <line num="211" count="104" type="stmt"/>
+      <line num="213" count="111" type="stmt"/>
+      <line num="234" count="1" type="stmt"/>
+      <line num="235" count="102" type="cond" truecount="2" falsecount="0"/>
+      <line num="248" count="1" type="stmt"/>
+      <line num="249" count="2" type="stmt"/>
+      <line num="250" count="2" type="stmt"/>
+      <line num="251" count="2" type="stmt"/>
+      <line num="253" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="254" count="1" type="stmt"/>
+      <line num="256" count="0" type="stmt"/>
+      <line num="268" count="1" type="stmt"/>
+      <line num="269" count="0" type="stmt"/>
+      <line num="270" count="0" type="stmt"/>
+      <line num="271" count="0" type="stmt"/>
+      <line num="273" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="274" count="0" type="stmt"/>
+      <line num="276" count="0" type="stmt"/>
+      <line num="288" count="1" type="stmt"/>
+      <line num="289" count="675" type="cond" truecount="2" falsecount="0"/>
+      <line num="295" count="1" type="stmt"/>
+      <line num="296" count="0" type="stmt"/>
+      <line num="301" count="1" type="stmt"/>
+      <line num="302" count="1" type="stmt"/>
+      <line num="312" count="1" type="stmt"/>
+      <line num="313" count="201" type="stmt"/>
+      <line num="314" count="201" type="cond" truecount="2" falsecount="0"/>
+      <line num="315" count="471" type="stmt"/>
+      <line num="316" count="100" type="stmt"/>
+      <line num="327" count="1" type="stmt"/>
+      <line num="328" count="200" type="cond" truecount="2" falsecount="0"/>
+      <line num="329" count="100" type="stmt"/>
+      <line num="343" count="1" type="stmt"/>
+      <line num="347" count="1" type="stmt"/>
+      <line num="348" count="1" type="cond" truecount="3" falsecount="1"/>
+      <line num="349" count="1" type="stmt"/>
+      <line num="351" count="0" type="stmt"/>
+      <line num="353" count="0" type="stmt"/>
+      <line num="383" count="1" type="stmt"/>
+      <line num="386" count="1" type="stmt"/>
+      <line num="387" count="2" type="cond" truecount="3" falsecount="1"/>
+      <line num="388" count="2" type="stmt"/>
+      <line num="390" count="2" type="stmt"/>
+      <line num="391" count="2" type="stmt"/>
+      <line num="392" count="2" type="stmt"/>
+      <line num="393" count="2" type="stmt"/>
+      <line num="394" count="4" type="stmt"/>
+      <line num="395" count="4" type="stmt"/>
+      <line num="398" count="1" type="stmt"/>
+      <line num="400" count="4" type="stmt"/>
+      <line num="402" count="3" type="stmt"/>
+      <line num="403" count="3" type="stmt"/>
+      <line num="405" count="1" type="stmt"/>
+      <line num="406" count="1" type="stmt"/>
+      <line num="409" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="410" count="1" type="stmt"/>
+      <line num="412" count="0" type="stmt"/>
+      <line num="415" count="1" type="stmt"/>
+    </file>
+    <file name="result.ts" path="/home/marccoquand/Projects/decoders/src/result.ts">
+      <metrics statements="29" coveredstatements="24" conditionals="10" coveredconditionals="6" methods="11" coveredmethods="9"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="4" count="2805" type="stmt"/>
+      <line num="5" count="6" type="stmt"/>
+      <line num="7" count="3" type="stmt"/>
+      <line num="10" count="3" type="stmt"/>
+      <line num="14" count="2805" type="stmt"/>
+      <line num="15" count="922" type="stmt"/>
+      <line num="17" count="417" type="stmt"/>
+      <line num="20" count="505" type="stmt"/>
+      <line num="24" count="2805" type="stmt"/>
+      <line num="25" count="0" type="stmt"/>
+      <line num="27" count="0" type="stmt"/>
+      <line num="29" count="0" type="stmt"/>
+      <line num="33" count="1" type="stmt"/>
+      <line num="34" count="101" type="stmt"/>
+      <line num="35" count="471" type="stmt"/>
+      <line num="37" count="471" type="stmt"/>
+      <line num="39" count="471" type="stmt"/>
+      <line num="41" count="0" type="stmt"/>
+      <line num="44" count="0" type="stmt"/>
+      <line num="48" count="1" type="stmt"/>
+      <line num="49" count="1367" type="stmt"/>
+      <line num="50" count="1" type="stmt"/>
+      <line num="51" count="510" type="stmt"/>
+      <line num="53" count="1" type="stmt"/>
+      <line num="54" count="1" type="stmt"/>
+      <line num="55" count="2805" type="stmt"/>
+      <line num="56" count="2805" type="stmt"/>
+      <line num="58" count="1" type="stmt"/>
+    </file>
+  </project>
+</coverage>

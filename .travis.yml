@@ -8,6 +8,7 @@ before_script:
 
 script:
   - yarn run test
+  - yarn run coveralls
 
 after_success:
   - yarn run typedoc

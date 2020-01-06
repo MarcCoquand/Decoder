@@ -12,7 +12,8 @@
     "build": "tsdx build -i src/decoder.ts",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "tsdx build -i src/decoder.ts"
+    "prepare": "tsdx build -i src/decoder.ts",
+    "coveralls": "jest --coverage --no-watch && cat ./tests/coverage/lcov.info | coveralls"
   },
   "peerDependencies": {},
   "husky": {
@@ -39,15 +40,17 @@
   "author": "Marc Coquand",
   "module": "dist/decoders.esm.js",
   "devDependencies": {
-    "@types/jest": "^24.0.24",
+    "@types/jest": "^24.0.25",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
+    "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.8.0",
     "eslint-plugin-prettier": "^3.1.2",
     "fast-check": "^1.21.0",
     "husky": "^3.1.0",
     "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
     "tsdx": "^0.12.0",
     "tslib": "^1.10.0",
     "typedoc": "^0.15.6",
