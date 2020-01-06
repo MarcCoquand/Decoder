@@ -13,7 +13,7 @@
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build -i src/decoder.ts",
-    "coveralls": "jest --coverage --no-watch && cat ./tests/coverage/lcov.info | coveralls"
+    "coveralls": "jest --coverage --no-watch && cat ./coverage/lcov.info | coveralls"
   },
   "peerDependencies": {},
   "husky": {
