@@ -4,7 +4,20 @@
 
 A powerful, well tested, data decoder for Typescript.
 
-See API Documentation for [Decoder](https://marccoquand.github.io/Decoder/classes/_decoder_.decoder.html)
+API Documentation: [Decoder](https://marccoquand.github.io/Decoder/classes/_decoder_.decoder.html)
+
+## Table of Content
+
+- [Decoder](#decoder)
+  - [Install](#install)
+  - [Motivation](#motivation)
+  - [_Tutorial_](#tutorial)
+  - [Credit](#credit)
+  - [Alternatives](#alternatives)
+  - [Local Development](#local-development)
+    - [`npm start` or `yarn start`](#-npm-start--or--yarn-start-)
+    - [`npm run build` or `yarn build`](#-npm-run-build--or--yarn-build-)
+    - [`npm test` or `yarn test`](#-npm-test--or--yarn-test-)
 
 ## Install
 
@@ -25,19 +38,6 @@ Then at the top of your file add:
 ```
 import {Decoder} from 'elm-decoders'
 ```
-
-## Table of Content
-
-- [Decoder](#decoder)
-  - [Install](#install)
-  - [Motivation](#motivation)
-  - [Tutorial](#tutorial)
-  - [Credit](#credit)
-  - [Alternatives](#alternatives)
-  - [Local Development](#local-development)
-    - [`npm start` or `yarn start`](#-npm-start--or--yarn-start-)
-    - [`npm run build` or `yarn build`](#-npm-run-build--or--yarn-build-)
-    - [`npm test` or `yarn test`](#-npm-test--or--yarn-test-)
 
 ## Motivation
 
