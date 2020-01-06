@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/MarcCoquand/Decoder/badge.svg?branch=master)](https://coveralls.io/github/MarcCoquand/Decoder?branch=master)
+
 # Decoder
 
 A powerful, well tested, data decoder for Typescript.
