@@ -4,7 +4,7 @@
 
 A powerful, well tested, data decoder for Typescript.
 
-See API Documentation: https://marccoquand.github.io/Decoder/
+See API Documentation for [Decoder](https://marccoquand.github.io/Decoder/classes/_decoder_.decoder.html)
 
 ## Install
 
