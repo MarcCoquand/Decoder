@@ -10,6 +10,7 @@
     "setup": "yarn install",
     "start": "tsdx watch",
     "build": "tsdx build -i src/decoder.ts",
+    "typedoc": "typedoc --out docs src && touch docs/.nojekyll",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build -i src/decoder.ts",

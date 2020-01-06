@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>elm-decoders - v1.5.3</title>
+	<title>elm-decoders - v1.5.5</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">elm-decoders - v1.5.3</a>
+					<a href="index.html" class="title">elm-decoders - v1.5.5</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> elm-decoders - v1.5.3</h1>
+			<h1> elm-decoders - v1.5.5</h1>
 		</div>
 	</div>
 </header>
@@ -68,6 +68,7 @@
 					<h1>Decoder</h1>
 				</a>
 				<p>A powerful, well tested, data decoder for Typescript.</p>
+				<p>See API Documentation: <a href="https://marccoquand.github.io/Decoder/">https://marccoquand.github.io/Decoder/</a></p>
 				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
 					<h2>Install</h2>
 				</a>
@@ -83,7 +84,6 @@
 							<li><a href="#install">Install</a></li>
 							<li><a href="#motivation">Motivation</a></li>
 							<li><a href="#tutorial">Tutorial</a></li>
-							<li><a href="#api-docs">API Docs</a></li>
 							<li><a href="#credit">Credit</a></li>
 							<li><a href="#alternatives">Alternatives</a></li>
 							<li><a href="#local-development">Local Development</a><ul>
@@ -146,189 +146,6 @@ const userDecoder: Decoder&lt;User&gt; = <span class="hljs-module-access"><span 
 				we want to create a set decoder, we can use the <code>map</code> method.</p>
 				<pre><code>const intSetDecoder: Decoder&lt;Set&lt;number&gt;&gt; = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">array</span>(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>number).map(numberArray =&gt; <span class="hljs-keyword">new</span> <span class="hljs-constructor">Set(<span class="hljs-params">numberArray</span>)</span>)</code></pre><p>This was a brief introduction. From here, please check the API documentation
 				to find out more what you can do and try it for yourself!</p>
-				<a href="#api-docs" id="api-docs" style="color: inherit; text-decoration: none;">
-					<h2>API Docs</h2>
-				</a>
-				<a href="#strongmethodstrong-codemydecodermapcode" id="strongmethodstrong-codemydecodermapcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.map</code></h3>
-				</a>
-				<p><code>map: &lt;S&gt;(mapFunction: (arg: T) =&gt; S) =&gt; Decoder&lt;S&gt;</code></p>
-				<p>Create a new, transformed, decoder. Useful for creating new decoders based on the
-				primitive decoders.</p>
-				<p>Example:</p>
-				<pre><code>const setDecoder: Decoder&lt;Set&lt;number&gt;&gt; =
-     <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">array</span>(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>number).map(numberArray =&gt; <span class="hljs-keyword">new</span> <span class="hljs-constructor">Set(<span class="hljs-params">numberArray</span>)</span>)
-
-setDecoder.run(<span class="hljs-literal">[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>]</span>) <span class="hljs-comment">//OK, Set([1,2,3])</span>
-setDecoder.run('hi') <span class="hljs-comment">// FAIL, input is not an array</span></code></pre>
-				<a href="#strongmethodstrong-codemydecoderwithdefaultcode" id="strongmethodstrong-codemydecoderwithdefaultcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.withDefault</code></h3>
-				</a>
-				<p><code>withDefault: &lt;E&gt;(value: T | E) =&gt; Decoder&lt;T | E&gt;</code></p>
-				<p>Sets a default value to the decoder if it fails.</p>
-				<p>Example:</p>
-				<pre><code>const nrDecoder = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>number.<span class="hljs-keyword">with</span><span class="hljs-constructor">Default(0)</span>
-
-nrDecoder.run(<span class="hljs-number">5</span>) <span class="hljs-comment">// OK 5</span>
-nrDecoder.run('hi') <span class="hljs-comment">// OK 0</span></code></pre>
-				<a href="#strongmethodstrong-codemydecodersatisfycode" id="strongmethodstrong-codemydecodersatisfycode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.satisfy</code></h3>
-				</a>
-				<pre><code><span class="hljs-string">satisfy:</span> (
-    {predicate, failureMessage}: {
-<span class="hljs-symbol">        predicate:</span> (<span class="hljs-string">arg:</span> T) =&gt; <span class="hljs-keyword">boolean</span>;
-        failureMessage?: string;}
-    ) =&gt; Decoder&lt;T&gt;</code></pre><p>Add an extra predicate to the decoder.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-keyword">const</span> naturalNumber = Decoder.number.satisfy({
- predicate: n =&gt; n&gt;<span class="hljs-number">0</span>
- failureMessage: `Not a natural number &gt; <span class="hljs-number">0</span>`
-})
-naturalNumber.run(<span class="hljs-number">5</span>) <span class="hljs-comment">// OK, 5</span>
-naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment">// FAIL</span></code></pre>
-				<a href="#strongmethodstrong-codemydecoderorcode" id="strongmethodstrong-codemydecoderorcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.or</code></h3>
-				</a>
-				<pre><code>or : <span class="hljs-tag">&lt;<span class="hljs-name">S</span>&gt;</span>(decoder: Decoder<span class="hljs-tag">&lt;<span class="hljs-name">S</span>&gt;</span>) =&gt; Decoder<span class="hljs-tag">&lt;<span class="hljs-name">T</span> | <span class="hljs-attr">S</span>&gt;</span>`</code></pre><p>Attempt the first decoder, if it fails, attempt the second one.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-keyword">type</span> Names = <span class="hljs-string">"Jack"</span> | <span class="hljs-string">"Sofia"</span>
-<span class="hljs-keyword">const</span> enums: Decoder&lt;Names&gt; = Decoder.literalString(<span class="hljs-string">"Jack"</span>).or(Decoder.literalString(<span class="hljs-string">"Sofia"</span>))
-
-enums.<span class="hljs-keyword">run</span>(<span class="hljs-string">"Jack"</span>) <span class="hljs-comment">// OK</span>
-enums.<span class="hljs-keyword">run</span>(<span class="hljs-string">"Sofia"</span>) <span class="hljs-comment">// OK</span>
-enums.<span class="hljs-keyword">run</span>(<span class="hljs-string">"Josefine"</span>) <span class="hljs-comment">// Fail</span></code></pre>
-				<a href="#strongmethodstrong-codemydecoderruncode" id="strongmethodstrong-codemydecoderruncode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.run</code></h3>
-				</a>
-				<pre><code><span class="hljs-string">run:</span> (<span class="hljs-string">data:</span> any) =&gt; {<span class="hljs-string">type:</span> <span class="hljs-string">"OK"</span>: <span class="hljs-string">value:</span> T} | {<span class="hljs-string">type:</span> <span class="hljs-string">"FAIL"</span>, <span class="hljs-string">error:</span> string}</code></pre><p>Run a decoder on data. The result is a <a href="https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions">discriminated union</a>. In order to
-				access the result you must explicitly handle the failure case with a switch.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-keyword">const</span> userCredentials: <span class="hljs-type">Decoder</span>&lt;<span class="hljs-type">Credentials</span>&gt; = <span class="hljs-type">Decoder</span>.<span class="hljs-keyword">object</span>(<span class="hljs-meta">{...}</span>)
-
-//... <span class="hljs-type">Somewhere</span> <span class="hljs-keyword">else</span>
-<span class="hljs-keyword">const</span> <span class="hljs-literal">result</span> = userCredentials.run(request.query)
-switch(<span class="hljs-literal">result</span>.<span class="hljs-keyword">type</span>) {
-    <span class="hljs-keyword">case</span> <span class="hljs-string">"OK"</span>:
-        login(<span class="hljs-literal">result</span>.value)
-    <span class="hljs-keyword">case</span> <span class="hljs-string">"FAIL"</span>:
-        throw new <span class="hljs-type">Error</span>(<span class="hljs-literal">result</span>.error)
-}</code></pre>
-				<a href="#strongmethodstrong-codemydecoderthencode" id="strongmethodstrong-codemydecoderthencode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Method</strong> <code>myDecoder.then</code></h3>
-				</a>
-				<pre><code><span class="hljs-symbol">then:</span> <span class="hljs-params">&lt;S&gt;</span>(dependentDecoder: (res: T) =&gt; Decoder<span class="hljs-params">&lt;S&gt;</span>) =&gt; Decoder<span class="hljs-params">&lt;S&gt;</span></code></pre><p>Create decoders that are dependent on previous results.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-keyword">const</span> version = <span class="hljs-type">Decoder</span>.<span class="hljs-keyword">object</span>({
- version: <span class="hljs-type">Decoder</span>.literalNumber(<span class="hljs-number">0</span>).<span class="hljs-keyword">or</span>(<span class="hljs-type">Decoder</span>.literalNumber(<span class="hljs-number">1</span>)),
-});
-<span class="hljs-keyword">const</span> api = ({ version }: { version: <span class="hljs-number">0</span> | <span class="hljs-number">1</span> }): <span class="hljs-type">Decoder</span>&lt;<span class="hljs-meta">{...}</span>&gt; =&gt; {
-  switch (version) {
-     <span class="hljs-keyword">case</span> <span class="hljs-number">0</span>:
-       <span class="hljs-keyword">return</span> myFirstDecoder;
-     <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
-       <span class="hljs-keyword">return</span> mySecondDecoder;
-}
-};
-<span class="hljs-keyword">const</span> versionedApi = version.then(api);</code></pre>
-				<a href="#strongstatic-methodstrong-codedecodernull-decoderltnullgtcode" id="strongstatic-methodstrong-codedecodernull-decoderltnullgtcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.null: Decoder&lt;null&gt;</code></h3>
-				</a>
-				<p>A decoder that accepts undefined and null. Useful in conjunction with other
-				decoders.</p>
-				<p>Example:</p>
-				<pre><code>Decoder.<span class="hljs-literal">null</span>.<span class="hljs-built_in">run</span>(<span class="hljs-literal">null</span>) // OK, value is <span class="hljs-literal">null</span>
-Decoder.<span class="hljs-literal">null</span>.<span class="hljs-built_in">run</span>(undefined) // OK, value is <span class="hljs-literal">null</span>
-Decoder.<span class="hljs-literal">null</span>.<span class="hljs-built_in">run</span>(<span class="hljs-number">5</span>) // FAIL, value is <span class="hljs-literal">not</span> <span class="hljs-literal">null</span> <span class="hljs-literal">or</span> undefined
-
-<span class="hljs-keyword">const</span> optionalNumberDecoder = Decoder.<span class="hljs-built_in">number</span>.<span class="hljs-literal">or</span>(Decoder.<span class="hljs-literal">null</span>)
-optionalNumberDecoder.<span class="hljs-built_in">run</span>(<span class="hljs-number">5</span>) // OK
-optionalNumberDecoder.<span class="hljs-built_in">run</span>(undefined) // OK
-optionalNumberDecoder.<span class="hljs-built_in">run</span>(<span class="hljs-string">'hi'</span>) // FAIL</code></pre>
-				<a href="#strongstatic-methodstrong-codedecodernumber-decoderltnumbergtcode" id="strongstatic-methodstrong-codedecodernumber-decoderltnumbergtcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.number: Decoder&lt;number&gt;</code></h3>
-				</a>
-				<p>A decoder that accepts numbers.</p>
-				<p>Example:</p>
-				<pre><code>Decoder.number.<span class="hljs-keyword">run</span>(<span class="hljs-number">5</span>) <span class="hljs-comment">// OK</span>
-Decoder.number.<span class="hljs-keyword">run</span>('<span class="hljs-number">5</span>') <span class="hljs-comment">// FAIL</span>
-Decoder.number.<span class="hljs-keyword">run</span>('hi') <span class="hljs-comment">// FAIL</span></code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderliteralstringcode" id="strongstatic-methodstrong-codedecoderliteralstringcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.literalString</code></h3>
-				</a>
-				<pre><code>literalString: &lt;T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">string</span>&gt;<span class="hljs-function">(<span class="hljs-params">str: T</span>) =&gt;</span> Decoder&lt;T&gt;</code></pre><p>Decodes the exact string and sets it to a string literal type. Useful for
-				parsing (discriminated) unions.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Names</span></span> = <span class="hljs-string">"Jack"</span> | <span class="hljs-string">"Sofia"</span>
-<span class="hljs-keyword">const</span> enums: Decoder&lt;Names&gt; = Decoder.literalString(<span class="hljs-string">"Jack"</span>).or(Decoder.literalString(<span class="hljs-string">"Sofia"</span>))</code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderliteralnumbercode" id="strongstatic-methodstrong-codedecoderliteralnumbercode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.literalNumber</code></h3>
-				</a>
-				<pre><code>literalNumber: &lt;T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">number</span>&gt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">number</span>: T</span>) =&gt;</span> Decoder&lt;T&gt;</code></pre><p>Decodes the exact number and sets it to a number literal type. Useful for
-				parsing (discriminated) unions.</p>
-				<p>Example:</p>
-				<pre><code>type Versions = Decoder&lt;<span class="hljs-number">1</span> | <span class="hljs-number">2</span>&gt;
-<span class="hljs-keyword">const</span> versionDecoder: Decoder&lt;Versions&gt; = Decoder.literalNumber(<span class="hljs-number">1</span>).<span class="hljs-keyword">or</span>(Decoder.literalNumber(<span class="hljs-number">2</span>))</code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderstring-decoderltstringgtcode" id="strongstatic-methodstrong-codedecoderstring-decoderltstringgtcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.string: Decoder&lt;string&gt;</code></h3>
-				</a>
-				<p>Decodes a string.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">string</span>.run('hi') <span class="hljs-comment">// OK</span>
-<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">string</span>.run(<span class="hljs-number">5</span>) <span class="hljs-comment">// Fail</span></code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderfailcode" id="strongstatic-methodstrong-codedecoderfailcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.fail</code></h3>
-				</a>
-				<pre><code>fai<span class="hljs-variable">l:</span> <span class="hljs-symbol">&lt;T&gt;</span>(message: <span class="hljs-built_in">string</span>) =&gt; Decoder<span class="hljs-symbol">&lt;T&gt;</span></code></pre><p>Create a decoder that always fails, useful in conjunction with andThen.</p>
-				<a href="#strongstatic-methodstrong-codedecoderokcode" id="strongstatic-methodstrong-codedecoderokcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.ok</code></h3>
-				</a>
-				<pre><code><span class="hljs-symbol">ok:</span> <span class="hljs-params">&lt;T&gt;</span>(value: T) =&gt; Decoder<span class="hljs-params">&lt;T&gt;</span>`</code></pre><p>Create a decoder that always suceeds, useful in conjunction with andThen</p>
-				<a href="#strongstatic-methodstrong-codedecoderarraycode" id="strongstatic-methodstrong-codedecoderarraycode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.array</code></h3>
-				</a>
-				<pre><code><span class="hljs-symbol">array:</span> <span class="hljs-params">&lt;T&gt;</span>(decoder: Decoder<span class="hljs-params">&lt;T&gt;</span>) =&gt; Decoder<span class="hljs-params">&lt;T[]&gt;</span></code></pre><p>Create an array decoder given a decoder for the elements.</p>
-				<p>Example:</p>
-				<pre><code><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">array</span>(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">string</span>).run(<span class="hljs-literal">['<span class="hljs-identifier">hello</span>','<span class="hljs-identifier">world</span>']</span>) <span class="hljs-comment">// OK</span>
-<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">array</span>(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">string</span>).run(<span class="hljs-number">5</span>) <span class="hljs-comment">// Fail</span></code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderboolean-decoderltbooleangtcode" id="strongstatic-methodstrong-codedecoderboolean-decoderltbooleangtcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.boolean: Decoder&lt;boolean&gt;</code></h3>
-				</a>
-				<p>A decoder for booleans.</p>
-				<p>Example:</p>
-				<pre><code>Decoder.<span class="hljs-keyword">boolean</span>.<span class="hljs-built_in">run</span>(<span class="hljs-literal">true</span>) <span class="hljs-comment">// succeeds</span>
-Decoder.<span class="hljs-keyword">boolean</span>.<span class="hljs-built_in">run</span>(<span class="hljs-number">1</span>) <span class="hljs-comment">// fails</span></code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderfieldcode" id="strongstatic-methodstrong-codedecoderfieldcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.field</code></h3>
-				</a>
-				<pre><code><span class="hljs-symbol">field:</span> <span class="hljs-params">&lt;T&gt;</span>(fieldName: string, decoder: Decoder<span class="hljs-params">&lt;T&gt;</span>) =&gt; Decoder<span class="hljs-params">&lt;T&gt;</span></code></pre><p>Decode a specific field in an object using a given decoder.</p>
-				<p>Example:</p>
-				<pre><code>const versionDecoder = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>field(<span class="hljs-string">"version"</span>, <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>number)
-
-versionDecoder.run({version: <span class="hljs-number">5</span>}) <span class="hljs-comment">// OK</span>
-versionDecoder.run({name: <span class="hljs-string">"hi"</span>}) <span class="hljs-comment">// fail</span></code></pre>
-				<a href="#strongstatic-methodstrong-codedecoderobjectcode" id="strongstatic-methodstrong-codedecoderobjectcode" style="color: inherit; text-decoration: none;">
-					<h3><strong>Static Method</strong> <code>Decoder.object</code></h3>
-				</a>
-				<pre><code><span class="hljs-symbol">object:</span> <span class="hljs-params">&lt;T&gt;</span>(object: { [P in keyof T]: Decoder<span class="hljs-params">&lt;T[P]&gt;</span> }) =&gt; Decoder<span class="hljs-params">&lt;T&gt;</span></code></pre><p>Create a decoder for an object T. Will currently go through each field and
-				collect all the errors but in the future it might fail on first.</p>
-				<p>object is a <a href="https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types">Mapped type</a>,
-					an object containing only decoders for each field. For example
-				<code>{name: Decoder.string}</code> is a valid <code>object</code>.</p>
-				<p>Example:</p>
-				<pre><code>interface User {
-   name: <span class="hljs-built_in">string</span>
-   email: <span class="hljs-built_in">string</span>
-}
-
-<span class="hljs-comment">// typechecks</span>
-const decodeUser&lt;User&gt; = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>object({name: <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span><span class="hljs-built_in">string</span>, email: <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>email})
-
-decodeUser.run({name: <span class="hljs-string">"Jenny"</span>, email: <span class="hljs-string">"fakemail@fake.com"</span>}) <span class="hljs-comment">// OK</span>
-decodeUser.run({nm: <span class="hljs-string">"Bad"</span>}) <span class="hljs-comment">// FAIL</span>
-
-<span class="hljs-comment">// will not typecheck, object must have the same field names as user and</span>
-<span class="hljs-comment">// only contain decoders.</span>
-const decodeUser&lt;User&gt; = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>object({nem: 'Hi'})</code></pre>
 				<a href="#credit" id="credit" style="color: inherit; text-decoration: none;">
 					<h2>Credit</h2>
 				</a>
