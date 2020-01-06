@@ -7,7 +7,7 @@
     "dist"
   ],
   "scripts": {
-    "setup": "npm i",
+    "setup": "yarn i",
     "start": "tsdx watch",
     "build": "tsdx build -i src/decoder.ts",
     "test": "tsdx test",

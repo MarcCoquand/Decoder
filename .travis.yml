@@ -1,14 +1,14 @@
 language: nodejs
 
 before_script:
-  - npm run setup
-  - npm run build
+  - yarn run setup
+  - yarn run build
 
 script:
-  - npm run test
+  - yarn run test
 
 after_success:
-  - npm run typedoc
+  - yarn run typedoc
 
 deploy:
   - provider: pages
@@ -17,7 +17,7 @@ deploy:
     github_token: $GITHUB_TOKEN
     on:
       tags: true
-  - provider: npm
+  - provider: yarn
     skip_cleanup: true
     email: 'mcoquand@gmail.com'
     api_key: $NPM_TOKEN
