@@ -181,10 +181,10 @@ export class Decoder<T> {
    *        return mySecondDecoder;
    * }
    * };
-   * const versionedApi = version.andThen(api);
+   * const versionedApi = version.then(api);
    * ```
    */
-  andThen = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S> =>
+  then = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S> =>
     new Decoder(data => {
       const result = this.decoder(data);
       switch (result.get.type) {
@@ -231,12 +231,11 @@ export class Decoder<T> {
    * optionalNumberDecoder.run('hi') // FAIL
    *```
    */
-  public static null: Decoder<null> = new Decoder(data => {
-    if (data === null || data === undefined) return Result.ok(null);
-    else {
-      return Result.fail([`Not null or undefined`]);
-    }
-  });
+  public static null: Decoder<null> = new Decoder(data =>
+    data === null || data === undefined
+      ? Result.ok(null)
+      : Result.fail([`Not null or undefined`])
+  );
 
   /**
    * Decodes the exact string and sets it to a string literal type. Useful for

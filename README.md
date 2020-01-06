@@ -56,6 +56,8 @@ acquisition of the data.
 Decoders are great for validating and converting data from various sources:
 Kafka, request bodies or APIs to name a few examples.
 
+For more motivation, see this [blog post](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+
 ## Tutorial
 
 Decoder provides us with a few primitive decoders and a few methods to craft
@@ -218,10 +220,10 @@ switch(result.type) {
 }
 ```
 
-### **Method** `myDecoder.andThen`
+### **Method** `myDecoder.then`
 
 ```
-andThen: <S>(dependentDecoder: (res: T) => Decoder<S>) => Decoder<S>
+then: <S>(dependentDecoder: (res: T) => Decoder<S>) => Decoder<S>
 ```
 
 Create decoders that are dependent on previous results.
@@ -240,7 +242,7 @@ const api = ({ version }: { version: 0 | 1 }): Decoder<{...}> => {
        return mySecondDecoder;
 }
 };
-const versionedApi = version.andThen(api);
+const versionedApi = version.then(api);
 ```
 
 ### **Static Method** `Decoder.null: Decoder<null>`
@@ -419,8 +421,8 @@ with some small changes. decoders.js is inspired by Elm's decoders.
   it has no way of ensuring that a validator actually adheres to a certain type.
   This means that on top of writing the validator, you will have to also manually
   write unit tests to ensure that your validator adheres to your type or interface.
-  This creates way too much boilerplate, or relies on the developer to not make mistakes
-  which defeats the purpose of having static types in the first place
+  This creates way too much boilerplate or relies on the developer to not make mistakes.
+  See also this [blog post](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
 - [decoders.js](https://github.com/nvie/decoders). Features a different syntax but
   has a similar goal. It also contains two more dependencies compared to this library
   which has none.
