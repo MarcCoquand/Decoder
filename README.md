@@ -1,4 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/MarcCoquand/Decoder/badge.svg?branch=master)](https://coveralls.io/github/MarcCoquand/Decoder?branch=master)
+[![Build Status](https://travis-ci.org/MarcCoquand/Decoder.svg?branch=master)](https://travis-ci.org/MarcCoquand/Decoder)
 
 # Decoder
 
