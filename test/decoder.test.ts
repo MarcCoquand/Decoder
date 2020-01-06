@@ -101,6 +101,36 @@ describe('Null decoder', () => {
   });
 });
 
+describe('Methods', () => {
+  it('map', () => {
+    const setDecoder = Decoder.array(Decoder.number).map(arr => new Set(arr));
+    const result = setDecoder.run([1, 2, 3]);
+    expect(result).toHaveProperty('value', new Set([1, 2, 3]));
+  });
+  it('then', () => {
+    const thenDecoder = Decoder.number.then(_ => Decoder.ok('hi'));
+    const result = thenDecoder.run(1);
+
+    expect(result).toHaveProperty('value', 'hi');
+  });
+  it('or', () => {
+    const orDecoder = Decoder.number.or(Decoder.string);
+
+    const result1 = orDecoder.run(5);
+    const result2 = orDecoder.run('hi');
+
+    expect(result1).toHaveProperty('value', 5);
+    expect(result2).toHaveProperty('value', 'hi');
+  });
+
+  it('withDefault', () => {
+    const withDefaultDecoder = Decoder.number.withDefault(0);
+
+    const result = withDefaultDecoder.run('hi');
+    expect(result).toHaveProperty('value', 0);
+  });
+});
+
 describe('Other decoders', () => {
   it('decodes literals', () => {
     const success = Decoder.literalString('JACK').run('JACK');
@@ -132,6 +162,13 @@ describe('Other decoders', () => {
     });
     expect(ints).toEqual({ type: 'OK', value: { type: 'number', value: 5 } });
     expect(bool).toHaveProperty('type', 'FAIL');
+  });
+
+  it('decodes fields', () => {
+    const versionDecoder = Decoder.field('version', Decoder.number);
+
+    const result = versionDecoder.run({ version: 5 });
+    expect(result).toHaveProperty('value', 5);
   });
 
   it('decodes object', () => {

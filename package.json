@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -19,6 +19,15 @@
       "pre-commit": "tsdx lint"
     }
   },
+  "keywords": [
+    "decoder",
+    "elm",
+    "typescript",
+    "validation",
+    "decoders",
+    "parsing",
+    "type check"
+  ],
   "prettier": {
     "printWidth": 80,
     "semi": true,
