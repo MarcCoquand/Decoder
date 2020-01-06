@@ -1,0 +1,24 @@
+language: nodejs
+
+before_script:
+  - npm run build
+
+script:
+  - npm run test
+
+after_success:
+  - npm run typedoc
+
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    local_dir: docs/
+    github_token: $GITHUB_TOKEN
+    on:
+      tags: true
+  - provider: npm
+    skip_cleanup: true
+    email: 'mcoquand@gmail.com'
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
