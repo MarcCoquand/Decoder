@@ -1,5 +1,5 @@
 {
-  "version": "1.5.5",
+  "version": "1.5.6",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -9,11 +9,11 @@
   "scripts": {
     "setup": "yarn install",
     "start": "tsdx watch",
-    "build": "tsdx build -i src/decoder.ts",
+    "build": "tsdx build -i src/index.ts",
     "typedoc": "typedoc --out docs src && touch docs/.nojekyll",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "tsdx build -i src/decoder.ts",
+    "prepare": "tsdx build -i src/index.ts",
     "coveralls": "jest --coverage --no-watch && cat ./coverage/lcov.info | coveralls"
   },
   "peerDependencies": {},

@@ -1,4 +1,4 @@
-import { Decoder } from '../src/decoder';
+import { Decoder } from '../src';
 import * as fc from 'fast-check';
 
 describe('Number decoder', () => {
