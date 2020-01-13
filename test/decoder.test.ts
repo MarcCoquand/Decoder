@@ -6,15 +6,17 @@ describe('Number decoder', () => {
     fc.assert(
       fc.property(fc.maxSafeInteger(), n => {
         const res = Decoder.number.run(n);
+        const resAsNumber = Decoder.number.run(`${n}`)
 
         expect(res).toEqual({ type: 'OK', value: n });
+        expect(resAsNumber).toEqual({ type: 'OK', value: n });
       })
     );
   });
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
-        fc.pre(typeof anything !== 'number');
+        fc.pre(typeof anything !== 'number' || (typeof anything === 'string' && (anything as string).match(/^-?\d*(\.\d+)?$/) !== null));
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
@@ -27,7 +29,9 @@ describe('Boolean decoder', () => {
     fc.assert(
       fc.property(fc.boolean(), bool => {
         const res = Decoder.boolean.run(bool);
+        const resAsString = Decoder.boolean.run(`${bool}`);
         expect(res).toEqual({ type: 'OK', value: bool });
+        expect(resAsString).toEqual({ type: 'OK', value: bool });
       })
     );
   });
@@ -84,17 +88,17 @@ describe('Array decoder', () => {
 
 describe('Null decoder', () => {
   it('decodes null and undefined', () => {
-    const res2 = Decoder.null.run(undefined);
-    const res3 = Decoder.null.run(null);
-    expect(res2).toEqual({ type: 'OK', value: null });
-    expect(res3).toEqual({ type: 'OK', value: null });
+    const res2 = Decoder.empty.run(undefined);
+    const res3 = Decoder.empty.run(null);
+    expect(res2).toEqual({ type: 'OK', value: undefined });
+    expect(res3).toEqual({ type: 'OK', value: undefined });
   });
 
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
         fc.pre(anything !== null && anything !== undefined);
-        const res = Decoder.null.run(anything);
+        const res = Decoder.empty.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
     );
@@ -170,6 +174,20 @@ describe('Other decoders', () => {
     const result = versionDecoder.run({ version: 5 });
     expect(result).toHaveProperty('value', 5);
   });
+
+  it('nullable decoders', () => {
+    const optionalNumberDecoder = Decoder.optional(Decoder.number)
+
+    
+    const result1 = optionalNumberDecoder.run(5);
+    const result2 = optionalNumberDecoder.run(undefined);
+    const result3 = optionalNumberDecoder.run(null);
+    const result4 = optionalNumberDecoder.run('hi');
+    expect(result1).toHaveProperty('value', 5);
+    expect(result2).toHaveProperty('value', undefined);
+    expect(result3).toHaveProperty('value', undefined);
+    expect(result4).toHaveProperty('type', 'FAIL');
+  })
 
   it('decodes object', () => {
     const idDecoder = Decoder.number.satisfy({ predicate: n => n > 0 });

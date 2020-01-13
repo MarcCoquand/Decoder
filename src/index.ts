@@ -202,15 +202,17 @@ export class Decoder<T> {
    *
    * ```
    * Decoder.number.run(5) // OK
-   * Decoder.number.run('5') // FAIL
+   * Decoder.number.run('5') // OK
    * Decoder.number.run('hi') // FAIL
    * ```
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
-    if (isNaN(data) || typeof data !== 'number') {
-      return Result.fail([`Not a number`]);
-    } else {
+    if (typeof data === 'number' && !isNaN(data)) {
       return Result.ok(data);
+    } else if (typeof data === 'string' && data.length !== 0 && data.match(/^-?\d*(\.\d+)?$/) !== null ) {
+      return Result.ok(parseFloat(data))
+    } else {
+      return Result.fail([`Not a number`]);
     }
   });
 
@@ -221,19 +223,19 @@ export class Decoder<T> {
    * Example:
    *
    * ```
-   * Decoder.null.run(null) // OK, value is null
-   * Decoder.null.run(undefined) // OK, value is null
+   * Decoder.null.run(null) // OK, value is undefined
+   * Decoder.null.run(undefined) // OK, value is undefined
    * Decoder.null.run(5) // FAIL, value is not null or undefined
    *
-   * const optionalNumberDecoder = Decoder.number.or(Decoder.null)
+   * const optionalNumberDecoder = Decoder.number.or(Decoder.empty)
    * optionalNumberDecoder.run(5) // OK
    * optionalNumberDecoder.run(undefined) // OK
    * optionalNumberDecoder.run('hi') // FAIL
    *```
    */
-  public static null: Decoder<null> = new Decoder(data =>
+  public static empty: Decoder<undefined> = new Decoder(data =>
     data === null || data === undefined
-      ? Result.ok(null)
+      ? Result.ok(undefined)
       : Result.fail([`Not null or undefined`])
   );
 
@@ -289,6 +291,19 @@ export class Decoder<T> {
     typeof data === 'string' ? Result.ok(data) : Result.fail([`Not a string`])
   );
 
+  /** 
+   * Takes a decoder and returns an optional decoder
+   * 
+   * ```
+   * const optionalNumber = Decoder.optional(Decoder.number)
+   * optionalNumber.run(5) //OK
+   * optionalNumber.run(undefined) //OK
+   * optionalNumber.run(null) //OK
+   * optionalNumber.run('hi') //FAIL
+   */
+  public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> => 
+    decoder.or(Decoder.empty)
+
   /**
    * Create a decoder that always fails, useful in conjunction with andThen.
    */
@@ -321,11 +336,22 @@ export class Decoder<T> {
    *
    * ```
    * Decoder.boolean.run(true) // succeeds
+   * Decoder.boolean.run('true') // succeeds
    * Decoder.boolean.run(1) // fails
    * ```
    */
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
+    else if (typeof data === 'string') {
+      switch(data) {
+        case "true": 
+          return Result.ok(true)
+        case "false":
+          return Result.ok(false)
+        default:
+          return Result.fail([`Not a boolean`]) 
+      }
+    } 
     else return Result.fail([`Not a boolean`]);
   });
 
