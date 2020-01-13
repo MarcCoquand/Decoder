@@ -54,49 +54,6 @@ export class Decoder<T> {
       if (Result.isOk(result)) return result;
       else return Result.ok(value);
     });
-
-  /**
-   * Add an extra predicate to the decoder.
-   *
-   * @param {function} predicate A predicate function to run on the decoded value
-   * @param {string} failureMessage Optional failure message to run in case the
-   *    predicate fails. Provides the data that the predicate checked.
-   *
-   * Example:
-   *
-   * ```
-   * const naturalNumber = Decoder.number.satisfy({
-   *  predicate: n => n>0
-   *  failureMessage: `Not a natural number > 0`
-   * })
-   * naturalNumber.run(5) // OK, 5
-   * naturalNumber.run(-1) // FAIL
-   * ```
-   */
-  satisfy = ({
-    predicate,
-    failureMessage,
-  }: {
-    predicate: (arg: T) => boolean;
-    failureMessage?: string;
-  }): Decoder<T> =>
-    new Decoder(data => {
-      const result = this.decoder(data);
-
-      switch (result.get.type) {
-        case 'OK':
-          if (predicate(result.get.value)) {
-            return result;
-          } else {
-            if (failureMessage !== undefined)
-              return Result.fail([failureMessage]);
-            else return Result.fail([`Predicate failed`]);
-          }
-        case 'FAIL':
-          return result;
-      }
-    });
-
   /**
    * Attempt two decoders.
    *
@@ -192,6 +149,40 @@ export class Decoder<T> {
           return dependentDecoder(result.get.value).decoder(data);
         case 'FAIL':
           return new Result({ type: 'FAIL', error: result.get.error });
+      }
+    });
+
+  /**
+   * Add an extra predicate to the decoder.
+   *
+   * @param {function} predicate A predicate function to run on the decoded value
+   * @param {string} failureMessage Optional failure message to run in case the
+   *    predicate fails. Provides the data that the predicate checked.
+   *
+   * Example:
+   *
+   * ```
+   * const naturalNumber = Decoder.number.satisfy({
+   *  predicate: n => n>0
+   *  failureMessage: `Not a natural number > 0`
+   * })
+   * naturalNumber.run(5) // OK, 5
+   * naturalNumber.run(-1) // FAIL
+   * ```
+   */
+  satisfy = ({
+    predicate,
+    failureMessage,
+  }: {
+    predicate: (arg: T) => boolean;
+    failureMessage?: string;
+  }): Decoder<T> =>
+    this.then(value => {
+      if (predicate(value)) {
+        return Decoder.ok(value);
+      } else {
+        const message = failureMessage ? failureMessage : `Predicate failed`;
+        return Decoder.fail(message);
       }
     });
 
