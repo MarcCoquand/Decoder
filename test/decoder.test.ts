@@ -6,7 +6,7 @@ describe('Number decoder', () => {
     fc.assert(
       fc.property(fc.maxSafeInteger(), n => {
         const res = Decoder.number.run(n);
-        const resAsNumber = Decoder.number.run(`${n}`)
+        const resAsNumber = Decoder.number.run(`${n}`);
 
         expect(res).toEqual({ type: 'OK', value: n });
         expect(resAsNumber).toEqual({ type: 'OK', value: n });
@@ -16,7 +16,11 @@ describe('Number decoder', () => {
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
-        fc.pre(typeof anything !== 'number' || (typeof anything === 'string' && (anything as string).match(/^-?\d*(\.\d+)?$/) !== null));
+        fc.pre(
+          typeof anything !== 'number' ||
+            (typeof anything === 'string' &&
+              (anything as string).match(/^-?\d*(\.\d+)?$/) !== null)
+        );
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
@@ -41,6 +45,53 @@ describe('Boolean decoder', () => {
         fc.pre(typeof anything !== 'boolean');
         const res = Decoder.boolean.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('Date decoder', () => {
+  it('decodes dates', () => {
+    fc.assert(
+      fc.property(fc.date(), date => {
+        const res = Decoder.date.run(date);
+        const res2 = Decoder.date.run(date.toISOString());
+        switch (res.type) {
+          case 'OK':
+            expect(res.value).toEqual(date);
+            break;
+          case 'FAIL':
+            expect(true).toBe(false);
+        }
+        switch (res2.type) {
+          case 'OK':
+            expect(res2.value).toEqual(date);
+            break;
+          case 'FAIL':
+            expect(true).toBe(false);
+        }
+      })
+    );
+  });
+  it('does not decode invalid data', () => {
+    const isNatural = (n: number) =>
+      n >= 0 && Math.floor(n) === n && n !== Infinity;
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(
+          !(anything instanceof Date) &&
+            !(typeof anything === 'string' && isNatural(parseInt(anything)))
+        );
+        const res = Decoder.date.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+  it('does not decode UTC', () => {
+    fc.assert(
+      fc.property(fc.date(), date => {
+        const res3 = Decoder.date.run(date.toUTCString());
+        expect(res3).toHaveProperty('type', 'FAIL');
       })
     );
   });
@@ -176,9 +227,8 @@ describe('Other decoders', () => {
   });
 
   it('nullable decoders', () => {
-    const optionalNumberDecoder = Decoder.optional(Decoder.number)
+    const optionalNumberDecoder = Decoder.optional(Decoder.number);
 
-    
     const result1 = optionalNumberDecoder.run(5);
     const result2 = optionalNumberDecoder.run(undefined);
     const result3 = optionalNumberDecoder.run(null);
@@ -187,7 +237,7 @@ describe('Other decoders', () => {
     expect(result2).toHaveProperty('value', undefined);
     expect(result3).toHaveProperty('value', undefined);
     expect(result4).toHaveProperty('type', 'FAIL');
-  })
+  });
 
   it('decodes object', () => {
     const idDecoder = Decoder.number.satisfy({ predicate: n => n > 0 });

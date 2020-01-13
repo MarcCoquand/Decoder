@@ -207,13 +207,55 @@ export class Decoder<T> {
    * ```
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
+    const isStringNumber = (n: string) =>
+      n.length !== 0 && n.match(/^-?\d*(\.\d+)?$/) !== null;
+
     if (typeof data === 'number' && !isNaN(data)) {
       return Result.ok(data);
-    } else if (typeof data === 'string' && data.length !== 0 && data.match(/^-?\d*(\.\d+)?$/) !== null ) {
-      return Result.ok(parseFloat(data))
+    } else if (typeof data === 'string' && isStringNumber(data)) {
+      return Result.ok(parseFloat(data));
     } else {
       return Result.fail([`Not a number`]);
     }
+  });
+
+  /**
+   * A decoder for dates. Note that decoding UTC time that is formatted using
+   * `toUTCString()` is not supported because Javascript's date parser parses it
+   * wrong.
+   *
+   * Example:
+   *
+   * ```
+   * Decoder.date.run("123") // OK (Timestamp)
+   * Decoder.date.run(new Date()) // OK
+   * Decoder.date.run("abra") // FAIL
+   * Decoder.date.run("2020-01-13T18:27:35.817Z") // OK
+   * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
+   * ```
+   */
+  public static date: Decoder<Date> = new Decoder((data: any) => {
+    const isDate = (d: Date) => !isNaN(d.getDate());
+    const isUTC = (str: string) =>
+      str.match(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/) !== null;
+    const isStringNaturalNumber = (n: string) =>
+      n.length !== 0 && n.match(/^-?\d*(\.\d+)?$/) !== null;
+    if (
+      Object.prototype.toString.call(data) === '[object Date]' &&
+      isDate(data)
+    )
+      return Result.ok(data);
+    else if (typeof data === 'string') {
+      if (isStringNaturalNumber(data)) {
+        const date = new Date(data);
+        if (isDate(date)) return Result.ok(date);
+        else return Result.fail([`Not a ISO date or timestamp`]);
+      } else if (!isUTC(data)) {
+        const date = new Date(data);
+        if (isDate(date)) return Result.ok(date);
+        else return Result.fail([`Not a ISO date or timestamp`]);
+      } else return Result.fail([`Not a ISO date or timestamp`]);
+    } else return Result.fail([`Not a ISO date or timestamp`]);
   });
 
   /**
@@ -291,9 +333,9 @@ export class Decoder<T> {
     typeof data === 'string' ? Result.ok(data) : Result.fail([`Not a string`])
   );
 
-  /** 
+  /**
    * Takes a decoder and returns an optional decoder
-   * 
+   *
    * ```
    * const optionalNumber = Decoder.optional(Decoder.number)
    * optionalNumber.run(5) //OK
@@ -301,8 +343,8 @@ export class Decoder<T> {
    * optionalNumber.run(null) //OK
    * optionalNumber.run('hi') //FAIL
    */
-  public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> => 
-    decoder.or(Decoder.empty)
+  public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> =>
+    decoder.or(Decoder.empty);
 
   /**
    * Create a decoder that always fails, useful in conjunction with andThen.
@@ -343,16 +385,15 @@ export class Decoder<T> {
   public static boolean: Decoder<boolean> = new Decoder(data => {
     if (typeof data === 'boolean') return Result.ok(data);
     else if (typeof data === 'string') {
-      switch(data) {
-        case "true": 
-          return Result.ok(true)
-        case "false":
-          return Result.ok(false)
+      switch (data) {
+        case 'true':
+          return Result.ok(true);
+        case 'false':
+          return Result.ok(false);
         default:
-          return Result.fail([`Not a boolean`]) 
+          return Result.fail([`Not a boolean`]);
       }
-    } 
-    else return Result.fail([`Not a boolean`]);
+    } else return Result.fail([`Not a boolean`]);
   });
 
   /**
