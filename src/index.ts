@@ -199,12 +199,13 @@ export class Decoder<T> {
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
     const isStringNumber = (n: string) =>
-      n.length !== 0 && n.match(/^-?\d*(\.\d+)?$/) !== null;
+      n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 
     if (typeof data === 'number' && !isNaN(data)) {
       return Result.ok(data);
     } else if (typeof data === 'string' && isStringNumber(data)) {
-      return Result.ok(parseFloat(data));
+      const result = parseFloat(data);
+      return Result.ok(result);
     } else {
       return Result.fail([`Not a number`]);
     }
@@ -227,10 +228,9 @@ export class Decoder<T> {
    */
   public static date: Decoder<Date> = new Decoder((data: any) => {
     const isDate = (d: Date) => !isNaN(d.getDate());
-    const isUTC = (str: string) =>
-      str.match(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/) !== null;
-    const isStringNaturalNumber = (n: string) =>
-      n.length !== 0 && n.match(/^-?\d*(\.\d+)?$/) !== null;
+    const isStringNaturalNumber = (n: string) => n.match(/^\d+$/) !== null;
+    const isISO = (str: string) =>
+      str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
     if (
       Object.prototype.toString.call(data) === '[object Date]' &&
       isDate(data)
@@ -241,7 +241,7 @@ export class Decoder<T> {
         const date = new Date(data);
         if (isDate(date)) return Result.ok(date);
         else return Result.fail([`Not a ISO date or timestamp`]);
-      } else if (!isUTC(data)) {
+      } else if (isISO(data)) {
         const date = new Date(data);
         if (isDate(date)) return Result.ok(date);
         else return Result.fail([`Not a ISO date or timestamp`]);

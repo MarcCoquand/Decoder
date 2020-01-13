@@ -17,9 +17,9 @@ describe('Number decoder', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
         fc.pre(
-          typeof anything !== 'number' ||
-            (typeof anything === 'string' &&
-              (anything as string).match(/^-?\d*(\.\d+)?$/) !== null)
+          typeof anything !== 'number' &&
+            typeof anything === 'string' &&
+              (anything as string).match(/^[+-]?\d+(\.\d+)?$/) === null
         );
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
