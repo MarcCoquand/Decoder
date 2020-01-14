@@ -38,7 +38,7 @@ yarn add elm-decoders
 
 Then at the top of your file add:
 
-```
+```typescript
 import {Decoder} from 'elm-decoders'
 ```
 
@@ -69,7 +69,7 @@ For more motivation, see this [blog post](https://lexi-lambda.github.io/blog/201
 Decoder provides us with a few primitive decoders and a few methods to craft
 new ones. Let's say we have the following data:
 
-```
+```typescript
 const incomingData: any = {
     name: "Nick",
     age: 30
@@ -78,7 +78,7 @@ const incomingData: any = {
 
 And we have an interface `User`:
 
-```
+```typescript
 interface User {
     name: string
     age: number
@@ -87,7 +87,7 @@ interface User {
 
 To validate that `incomingData` is a `User`, Decoder provides an `object` primitive.
 
-```
+```typescript
 import {Decoder} from 'elm-decoders'
 
 const userDecoder: Decoder<User> = Decoder.object({
@@ -98,7 +98,7 @@ const userDecoder: Decoder<User> = Decoder.object({
 
 Now we can validate `incomingData` and ensure the data is correct.
 
-```
+```typescript
 const result = userDecoder.run(incomingData)
 ```
 
@@ -107,7 +107,7 @@ union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discrimi
 meaning is returns _either_ `{type: "OK", value: T}` _or_ `{type: "FAIL": error: string}`. This means that we are forced to check if the data received is correct or contains an error. Doing so
 is as simple as a switch case:
 
-```
+```typescript
 switch(result.type) {
     case "OK":
         doUserThing(result.value)
@@ -119,7 +119,7 @@ switch(result.type) {
 Decoder also provides a few methods for creating new decoders. For example, if
 we want to create a set decoder, we can use the `map` method.
 
-```
+```typescript
 const intSetDecoder: Decoder<Set<number>> = Decoder.array(Decoder.number).map(numberArray => new Set(numberArray))
 ```
 
