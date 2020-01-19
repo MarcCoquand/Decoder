@@ -103,22 +103,21 @@
 					<div class="tsd-signature tsd-kind-icon">Decoded<wbr>Value&lt;T&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">T extends Decoder&lt;infer U&gt; ? U : never</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L504">index.ts:504</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L507">index.ts:507</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Deduce the return type of a decoder.</p>
+							<p>Deduce the return type of a decoder. If there is a deep nesting of objects
+							the type will be inferred but will not display correctly in the signature.</p>
 						</div>
 						<p>Example:</p>
 						<pre><code>const paramDecoder = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Decoder</span>.</span></span>object({
  body: userDecoder
 })
-
 const handleRequest =<span class="hljs-function"> (<span class="hljs-params">params</span>: D<span class="hljs-params">ecodedValue</span>&lt;<span class="hljs-params">typeof</span> <span class="hljs-params">paramDecoder</span>&gt;) =&gt;</span> {
- <span class="hljs-comment">// params.body is infered and type checked</span>
-}</code></pre><p>Note that if there is a deep nesting of objects it will be inferred but not
-						displayed properly in the type signature.</p>
+ <span class="hljs-comment">// params.body is inferred</span>
+}</code></pre>
 					</div>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
 					<ul class="tsd-type-parameters">
@@ -133,7 +132,7 @@ const handleRequest =<span class="hljs-function"> (<span class="hljs-params">par
 					<div class="tsd-signature tsd-kind-icon">Non<wbr>Empty<wbr>Array&lt;T&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L10">index.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L10">index.ts:10</a></li>
 						</ul>
 					</aside>
 					<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -156,7 +155,7 @@ const handleRequest =<span class="hljs-function"> (<span class="hljs-params">par
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L4">index.ts:4</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L4">index.ts:4</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -179,7 +178,7 @@ const handleRequest =<span class="hljs-function"> (<span class="hljs-params">par
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L5">index.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L5">index.ts:5</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -202,7 +201,7 @@ const handleRequest =<span class="hljs-function"> (<span class="hljs-params">par
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L6">index.ts:6</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L6">index.ts:6</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -225,7 +224,7 @@ const handleRequest =<span class="hljs-function"> (<span class="hljs-params">par
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L8">index.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L8">index.ts:8</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>

@@ -165,7 +165,7 @@ switch(result.<span class="hljs-keyword">type</span>) {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L113">index.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L113">index.ts:113</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -205,7 +205,7 @@ switch(result.<span class="hljs-keyword">type</span>) {
 					<div class="tsd-signature tsd-kind-icon">decoder<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L38">index.ts:38</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L38">index.ts:38</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -236,7 +236,7 @@ switch(result.<span class="hljs-keyword">type</span>) {
 					<div class="tsd-signature tsd-kind-icon">boolean<span class="tsd-signature-symbol">:</span> <a href="_index_.decoder.html" class="tsd-signature-type">Decoder</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Decoder(data &#x3D;&gt; {switch (typeof data) {case &#x27;boolean&#x27;:return Result.ok(data);case &#x27;string&#x27;:switch (data) {case &#x27;true&#x27;:return Result.ok(true);case &#x27;false&#x27;:return Result.ok(false);default:return Result.fail(makeSingleError(&#x27;Not a boolean&#x27;));}default: {return Result.fail(makeSingleError(&#x27;Not a boolean&#x27;));}}})</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L381">index.ts:381</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L386">index.ts:386</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -255,7 +255,7 @@ switch(result.<span class="hljs-keyword">type</span>) {
 					<div class="tsd-signature tsd-kind-icon">date<span class="tsd-signature-symbol">:</span> <a href="_index_.decoder.html" class="tsd-signature-type">Decoder</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Date</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;Decoder.oneOf([Decoder.number.satisfy({predicate: isNaturalNumber,failureMessage: &#x27;Not a ISO date or timestamp&#x27;,}).map(n &#x3D;&gt; new Date(n)),new Decoder((data: any) &#x3D;&gt; {switch (Object.prototype.toString.call(data)) {case &#x27;[object Date]&#x27;:if (isDate(data)) return Result.ok(data);return Result.fail(makeSingleError(&#x27;Badly formatted date object&#x27;));case &#x27;[object String]&#x27;:return isISO(data)? Result.ok(new Date(data)): Result.fail(makeSingleError(&#x60;Not a ISO date or timestamp&#x60;));default:return Result.fail(makeSingleError(&#x60;Not a ISO date or timestamp&#x60;));}}) as Decoder&lt;Date&gt;,])</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L238">index.ts:238</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L238">index.ts:238</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -278,7 +278,7 @@ switch(result.<span class="hljs-keyword">type</span>) {
 					<div class="tsd-signature tsd-kind-icon">empty<span class="tsd-signature-symbol">:</span> <a href="_index_.decoder.html" class="tsd-signature-type">Decoder</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Decoder(data &#x3D;&gt;data &#x3D;&#x3D;&#x3D; null || data &#x3D;&#x3D;&#x3D; undefined? Result.ok(undefined): Result.fail(makeSingleError(&#x27;Not null or undefined&#x27;)))</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L271">index.ts:271</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L271">index.ts:271</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -298,7 +298,7 @@ Decoder.empty.<span class="hljs-keyword">run</span>(<span class="hljs-number">5<
 					<div class="tsd-signature tsd-kind-icon">number<span class="tsd-signature-symbol">:</span> <a href="_index_.decoder.html" class="tsd-signature-type">Decoder</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Decoder((data: any) &#x3D;&gt; {switch (typeof data) {case &#x27;number&#x27;:if (!isNaN(data)) return Result.ok(data);return Result.fail(makeSingleError(&#x27;Not a number&#x27;));case &#x27;string&#x27;:if (isStringNumber(data)) return Result.ok(parseFloat(data));return Result.fail(makeSingleError(&#x27;Not a number&#x27;));default:return Result.fail(makeSingleError(&#x27;Not a number&#x27;));}})</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L211">index.ts:211</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L211">index.ts:211</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -317,7 +317,7 @@ Decoder.number.<span class="hljs-keyword">run</span>('hi') <span class="hljs-com
 					<div class="tsd-signature tsd-kind-icon">string<span class="tsd-signature-symbol">:</span> <a href="_index_.decoder.html" class="tsd-signature-type">Decoder</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Decoder((data: any) &#x3D;&gt;typeof data &#x3D;&#x3D;&#x3D; &#x27;string&#x27;? Result.ok(data): Result.fail(makeSingleError(&#x27;Not a string&#x27;)))</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L285">index.ts:285</a></li>
+							<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L285">index.ts:285</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -341,7 +341,7 @@ Decoder.number.<span class="hljs-keyword">run</span>('hi') <span class="hljs-com
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L62">index.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L62">index.ts:62</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -379,7 +379,7 @@ nrDecoder.<span class="hljs-built_in">run</span>(<span class="hljs-string">'hi'<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L49">index.ts:49</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L49">index.ts:49</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -434,7 +434,7 @@ nrDecoder.<span class="hljs-built_in">run</span>(<span class="hljs-string">'hi'<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L135">index.ts:135</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L135">index.ts:135</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -475,7 +475,7 @@ switch(<span class="hljs-literal">result</span>.<span class="hljs-keyword">type<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L185">index.ts:185</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L185">index.ts:185</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -537,7 +537,7 @@ naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L160">index.ts:160</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L160">index.ts:160</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -602,7 +602,7 @@ naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L364">index.ts:364</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L369">index.ts:369</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -639,7 +639,7 @@ naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L69">index.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L69">index.ts:69</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -671,12 +671,12 @@ naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L325">index.ts:325</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L330">index.ts:330</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Create a decoder that always fails</p>
+									<p>Create a decoder that always fails with a message.</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -705,7 +705,7 @@ naturalNumber.run(<span class="hljs-number">-1</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L412">index.ts:412</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L417">index.ts:417</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -747,7 +747,7 @@ versionDecoder.run({name: <span class="hljs-string">"hi"</span>}) <span class="h
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L348">index.ts:348</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L353">index.ts:353</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -789,7 +789,7 @@ versionDecoder.run(<span class="hljs-number">3</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L302">index.ts:302</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L305">index.ts:305</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -798,8 +798,12 @@ versionDecoder.run(<span class="hljs-number">3</span>) <span class="hljs-comment
 									parsing unions.</p>
 								</div>
 								<p>Example:</p>
-								<pre><code><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Names</span></span> = <span class="hljs-string">"Jack"</span> | <span class="hljs-string">"Sofia"</span>
-<span class="hljs-keyword">const</span> enums: Decoder&lt;Names&gt; = Decoder.literalString(<span class="hljs-string">"Jack"</span>).or(Decoder.literalString(<span class="hljs-string">"Sofia"</span>))</code></pre>
+								<pre><code>const jackOrSofia: Decoder&lt;<span class="hljs-string">'Jack'</span> | <span class="hljs-string">'Sofia'</span>&gt; = Decoder.oneOf([
+   Decoder.literalString(<span class="hljs-string">'Jack'</span>),
+   Decoder.literalString(<span class="hljs-string">'Sofia'</span>)
+])
+jackOrSofia.<span class="hljs-keyword">run</span><span class="bash">(<span class="hljs-string">'Jack'</span>) // OK</span>
+jackOrSofia.<span class="hljs-keyword">run</span><span class="bash">(<span class="hljs-string">'Josephine'</span>) // FAIL</span></code></pre>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
@@ -827,7 +831,7 @@ versionDecoder.run(<span class="hljs-number">3</span>) <span class="hljs-comment
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L450">index.ts:450</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L455">index.ts:455</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -882,7 +886,7 @@ const decodeUser&lt;User&gt; = <span class="hljs-module-access"><span class="hlj
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L331">index.ts:331</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L336">index.ts:336</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -916,7 +920,7 @@ const decodeUser&lt;User&gt; = <span class="hljs-module-access"><span class="hlj
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L110">index.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L110">index.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -960,13 +964,14 @@ enums.<span class="hljs-built_in">run</span>(<span class="hljs-string">"Josefine
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/8e96a7e/src/index.ts#L319">index.ts:319</a></li>
+									<li>Defined in <a href="https://github.com/MarcCoquand/Decoder/blob/e8c988a/src/index.ts#L324">index.ts:324</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Takes a decoder and returns and makes it optional.</p>
+									<p>Takes a decoder and returns an optional decoder.</p>
 								</div>
+								<p>Example:</p>
 								<pre><code>const optionalNumber = Decoder.optional(Decoder.number)
 optionalNumber.<span class="hljs-keyword">run</span><span class="bash">(5) //OK</span>
 optionalNumber.<span class="hljs-keyword">run</span><span class="bash">(undefined) //OK</span>

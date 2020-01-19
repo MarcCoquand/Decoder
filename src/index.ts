@@ -293,10 +293,13 @@ export class Decoder<T> {
    * parsing unions.
    *
    * Example:
-   *
    * ```
-   * type Names = "Jack" | "Sofia"
-   * const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
+   * const jackOrSofia: Decoder<'Jack' | 'Sofia'> = Decoder.oneOf([
+   *    Decoder.literalString('Jack'),
+   *    Decoder.literalString('Sofia')
+   * ])
+   * jackOrSofia.run('Jack') // OK
+   * jackOrSofia.run('Josephine') // FAIL
    * ```
    */
   public static literalString = <T extends string>(str: T): Decoder<T> =>
@@ -307,20 +310,22 @@ export class Decoder<T> {
     );
 
   /**
-   * Takes a decoder and returns and makes it optional.
+   * Takes a decoder and returns an optional decoder.
    *
+   * Example:
    * ```
    * const optionalNumber = Decoder.optional(Decoder.number)
    * optionalNumber.run(5) //OK
    * optionalNumber.run(undefined) //OK
    * optionalNumber.run(null) //OK
    * optionalNumber.run('hi') //FAIL
+   * ```
    */
   public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> =>
     Decoder.oneOf([Decoder.empty, decoder]);
 
   /**
-   * Create a decoder that always fails
+   * Create a decoder that always fails with a message.
    */
   public static fail = <T>(message: string): Decoder<T> =>
     new Decoder(() => Result.fail(makeSingleError(message)));
@@ -485,20 +490,18 @@ export class Decoder<T> {
 }
 
 /**
- * Deduce the return type of a decoder.
+ * Deduce the return type of a decoder. If there is a deep nesting of objects
+ * the type will be inferred but will not display correctly in the signature.
  *
  * Example:
  * ```
  * const paramDecoder = Decoder.object({
  *  body: userDecoder
  * })
- *
  * const handleRequest = (params: DecodedValue<typeof paramDecoder>) => {
- *  // params.body is infered and type checked
+ *  // params.body is inferred
  * }
  * ```
- * Note that if there is a deep nesting of objects it will be inferred but not
- * displayed properly in the type signature.
  *
  */
 export type DecodedValue<T> = T extends Decoder<infer U> ? U : never;
