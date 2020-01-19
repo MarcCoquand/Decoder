@@ -38,7 +38,9 @@ export class Decoder<T> {
   private decoder: (data: any) => Result<T, DecodeError>;
 
   /**
-   * Transform a decoder. Useful for narrowing data types. For example:
+   * Transform a decoder from T to S.
+   *
+   * Example:
    * ```
    * const setDecoder: Decoder<Set<number>> =
    *      Decoder.array(Decoder.number).map(numberArray => new Set(numberArray))
@@ -88,20 +90,18 @@ export class Decoder<T> {
     });
 
   /**
-   * Attempt multiple decoders. Takes a non-empty array of various decoders. The
-   * type signature can informally be read as
+   * Attempt multiple decoders in order until one succeeds. Takes a non-empty
+   * array of various decoders. The type signature is informally:
    * ```
-   * oneOf = (decoders: [Decoder<A>, Decoder<B>, Decoder<C>, ...]) => Decoder<A | B | C | ...>
+   * oneOf = (decoders: [Decoder<A>, Decoder<B>, ...]) => Decoder<A | B | ...>
    * ```
    *
    * Example:
    * ```
-   * type Names = "Jack" | "Sofia"
-   * const enums: Decoder<Names> = Decoder.oneOf([
+   * const enums: Decoder<"Jack" | "Sofia"> = Decoder.oneOf([
    *    Decoder.literalString("Jack"),
    *    Decoder.literalString("Sofia")
    * ])
-   *
    * enums.run("Jack") // OK
    * enums.run("Sofia") // OK
    * enums.run("Josefine") // Fail
@@ -117,14 +117,11 @@ export class Decoder<T> {
   }
 
   /**
-   * Run a decoder on data. The result is a [discriminated union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions). In order to
-   * access the result you must explicitly handle the failure case with a switch.
+   * Run a decoder on data. The result is a [discriminated union](https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions).    *
    *
    * Example:
-   *
    * ```
    * const userCredentials: Decoder<Credentials> = Decoder.object({...})
-   *
    * //... Somewhere else
    * const result = userCredentials.run(request.query)
    * switch(result.type) {
@@ -145,7 +142,6 @@ export class Decoder<T> {
    * Create decoders that are dependent on previous results.
    *
    * Example:
-   *
    * ```
    * const version = Decoder.object({
    *  version: Decoder.literalNumber(0).or(Decoder.literalNumber(1)),
@@ -173,10 +169,10 @@ export class Decoder<T> {
     });
 
   /**
-   * Add an extra predicate to the decoder.
+   * Add an extra predicate to the decoder. Optionally add a failure message
+   * that overrides the earlier failure message.
    *
    * Example:
-   *
    * ```
    * const naturalNumber = Decoder.number.satisfy({
    *  predicate: n => n>0
@@ -203,10 +199,9 @@ export class Decoder<T> {
     });
 
   /**
-   * A decoder for numbers
+   * A decoder for numbers.
    *
    * Example:
-   *
    * ```
    * Decoder.number.run(5) // OK
    * Decoder.number.run('5') // OK
@@ -227,14 +222,13 @@ export class Decoder<T> {
   });
 
   /**
-   * A decoder for dates. Note that decoding UTC time that is formatted using
-   * `toUTCString()` is not supported because Javascript's date parser parses it
+   * A decoder for dates. Decoding UTC time that is formatted using
+   * `toUTCString()` is not supported; Javascript's date parser parses UTC strings
    * wrong.
    *
    * Example:
-   *
    * ```
-   * Decoder.date.run("123") // OK (Timestamp)
+   * Decoder.date.run(123) // OK (Timestamp)
    * Decoder.date.run(new Date()) // OK
    * Decoder.date.run("abra") // FAIL
    * Decoder.date.run("2020-01-13T18:27:35.817Z") // OK
@@ -268,7 +262,6 @@ export class Decoder<T> {
    * decoders.
    *
    * Example:
-   *
    * ```
    * Decoder.empty.run(null) // OK, value is undefined
    * Decoder.empty.run(undefined) // OK, value is undefined
@@ -314,7 +307,7 @@ export class Decoder<T> {
     );
 
   /**
-   * Takes a decoder and returns an optional decoder
+   * Takes a decoder and returns and makes it optional.
    *
    * ```
    * const optionalNumber = Decoder.optional(Decoder.number)
@@ -324,27 +317,32 @@ export class Decoder<T> {
    * optionalNumber.run('hi') //FAIL
    */
   public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> =>
-    Decoder.oneOf([decoder, Decoder.empty]);
+    Decoder.oneOf([Decoder.empty, decoder]);
 
   /**
-   * Create a decoder that always fails, useful in conjunction with andThen.
+   * Create a decoder that always fails
    */
   public static fail = <T>(message: string): Decoder<T> =>
     new Decoder(() => Result.fail(makeSingleError(message)));
 
   /**
-   * Create a decoder that always suceeds and returns value,
-   * useful in conjunction with andThen
+   * Create a decoder that always suceeds and returns T.
    */
   public static ok = <T>(value: T): Decoder<T> =>
     new Decoder(() => Result.ok(value));
 
   /**
-   * Decodes the exact number and sets it to a number literal type. Useful for
-   * parsing (discriminated) unions.
+   * Decodes the exact number and sets it to a number literal type.
+   *
+   * Example:
    * ```
-   * type Versions = Decoder<1 | 2>
-   * const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
+   * const versionDecoder: Decoder<1 | 2> = Decoder.oneOf([
+   *    Decoder.literalNumber(1),
+   *    Decoder.literalNumber(2)
+   * ])
+   *
+   * versionDecoder.run(1) // OK
+   * versionDecoder.run(3) // FAIL
    * ```
    */
   public static literalNumber = <T extends number>(number: T): Decoder<T> =>
@@ -357,6 +355,7 @@ export class Decoder<T> {
   /**
    * Create an array decoder given a decoder for the elements.
    *
+   * Example:
    * ```
    * Decoder.array(Decoder.string).run(['hello','world']) // OK
    * Decoder.array(Decoder.string).run(5) // Fail
@@ -372,9 +371,10 @@ export class Decoder<T> {
   /**
    * Create a decoder for booleans.
    *
+   * Example:
    * ```
    * Decoder.boolean.run(true) // succeeds
-   * Decoder.boolean.run('true') // succeeds
+   * Decoder.boolean.run('false') // succeeds
    * Decoder.boolean.run(1) // fails
    * ```
    */
@@ -396,12 +396,11 @@ export class Decoder<T> {
       }
     }
   });
+
   /**
-   * Decode the value of a specific key in an object using a given decoder. Returns the
-   * value without the key pairing.
+   * Decode the value of a specific key in an object using a given decoder.
    *
    * Example:
-   *
    * ```
    * const versionDecoder = Decoder.field("version", Decoder.number)
    *
@@ -422,13 +421,15 @@ export class Decoder<T> {
     });
 
   /**
-   * Create a decoder for an object T. Will currently go through each field and
-   * collect all the errors but in the future it might fail on first.
+   * Create a decoder for a type T.
    *
-   * object is a [Mapped type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
-   * an object containing only decoders for each field. For example
-   * `{name: Decoder.string}` is accepted but `{name: Decoder.string, email: string}` is rejected.
+   * Argument "object" is a [Mapped
+   * type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
+   * an object containing only decoders for each field. So `{name:
+   * Decoder.string}` is ok but `{name: Decoder.string, email: 'email@email'}` is
+   * rejected.
    *
+   * Example:
    * ```
    * interface User {
    *    name: string
@@ -437,7 +438,6 @@ export class Decoder<T> {
    *
    * // typechecks
    * const decodeUser<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
-   *
    * decodeUser.run({name: "Jenny", email: "fakemail@fake.com"}) // OK
    * decodeUser.run({nm: "Bad"}) // FAIL
    *
@@ -487,7 +487,7 @@ export class Decoder<T> {
 /**
  * Deduce the return type of a decoder.
  *
- * For example:
+ * Example:
  * ```
  * const paramDecoder = Decoder.object({
  *  body: userDecoder
