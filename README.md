@@ -8,7 +8,6 @@ Github: [Decoder](https://github.com/MarcCoquand/Decoder)
 [![Coverage Status](https://coveralls.io/repos/github/MarcCoquand/Decoder/badge.svg?branch=master)](https://coveralls.io/github/MarcCoquand/Decoder?branch=master)
 [![Build Status](https://travis-ci.org/MarcCoquand/Decoder.svg?branch=master)](https://travis-ci.org/MarcCoquand/Decoder)
 
-
 ## Table of Content
 
 - [Decoder](#decoder)
@@ -39,7 +38,7 @@ yarn add elm-decoders
 Then at the top of your file add:
 
 ```typescript
-import {Decoder} from 'elm-decoders'
+import { Decoder } from 'elm-decoders';
 ```
 
 ## Motivation
@@ -71,35 +70,35 @@ new ones. Let's say we have the following data:
 
 ```typescript
 const incomingData: any = {
-    name: "Nick",
-    age: 30
-}
+  name: 'Nick',
+  age: 30,
+};
 ```
 
 And we have an interface `User`:
 
 ```typescript
 interface User {
-    name: string
-    age: number
+  name: string;
+  age: number;
 }
 ```
 
 To validate that `incomingData` is a `User`, Decoder provides an `object` primitive.
 
 ```typescript
-import {Decoder} from 'elm-decoders'
+import { Decoder } from 'elm-decoders';
 
 const userDecoder: Decoder<User> = Decoder.object({
-    name: Decoder.string,
-    age: Decoder.number
-})
+  name: Decoder.string,
+  age: Decoder.number,
+});
 ```
 
 Now we can validate `incomingData` and ensure the data is correct.
 
 ```typescript
-const result = userDecoder.run(incomingData)
+const result = userDecoder.run(incomingData);
 ```
 
 `run` returns a [Discriminated
@@ -108,11 +107,11 @@ meaning is returns _either_ `{type: "OK", value: T}` _or_ `{type: "FAIL": error:
 is as simple as a switch case:
 
 ```typescript
-switch(result.type) {
-    case "OK":
-        doUserThing(result.value)
-    case "FAIL":
-        handleError(result.error)
+switch (result.type) {
+  case 'OK':
+    doUserThing(result.value);
+  case 'FAIL':
+    handleError(result.error);
 }
 ```
 
@@ -120,7 +119,29 @@ Decoder also provides a few methods for creating new decoders. For example, if
 we want to create a set decoder, we can use the `map` method.
 
 ```typescript
-const intSetDecoder: Decoder<Set<number>> = Decoder.array(Decoder.number).map(numberArray => new Set(numberArray))
+const intSetDecoder: Decoder<Set<number>> = Decoder.array(Decoder.number).map(
+  numberArray => new Set(numberArray)
+);
+```
+
+If there is an error, Decoder will also generate a helpful error report:
+
+```typescript
+> let userDecoder = Decoder.object({
+    name: Decoder.string,
+    auth: Decoder.object({
+        jwt: Decoder.string
+    })
+})
+> userDecoder.run({wrong: 'hi', auth: {wrongAgain: 'hi'}})
+{
+  type: 'FAIL',
+  error: 'Error(s) decoding data:\n' +
+    '  Could not decode object:\n' +
+    '    - Key name: Not a string\n' +
+    '    - Key auth: Could not decode object:\n' +
+    '      - Key jwt: Not a string'
+}
 ```
 
 This was a brief introduction. From here, please check the API documentation
