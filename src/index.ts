@@ -463,3 +463,22 @@ export class Decoder<T> {
       }
     });
 }
+
+/**
+ * Deduce the return type of a decoder.
+ *
+ * For example:
+ * ```
+ * const paramDecoder = Decoder.object({
+ *  body: userDecoder
+ * })
+ *
+ * const handleRequest = (params: DecodedValue<typeof paramDecoder>) => {
+ *  // params.body is infered and type checked
+ * }
+ * ```
+ * Note that if there is a deep nesting of objects it will be inferred but not
+ * displayed properly in the type signature.
+ *
+ */
+export type DecodedValue<T> = T extends Decoder<infer U> ? U : never;
