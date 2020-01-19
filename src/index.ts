@@ -277,6 +277,7 @@ export class Decoder<T> {
   /**
    * Decodes a string.
    *
+   * Example:
    * ```
    * Decoder.string.run('hi') // OK
    * Decoder.string.run(5) // Fail
@@ -430,9 +431,11 @@ export class Decoder<T> {
    *
    * Argument "object" is a [Mapped
    * type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
-   * an object containing only decoders for each field. So `{name:
-   * Decoder.string}` is ok but `{name: Decoder.string, email: 'email@email'}` is
-   * rejected.
+   * an object containing only decoders for each field.
+   * ```typescript
+   * {name: Decoder.string} // Ok parameter
+   * {name: Decoder.string, email: 'email@email'} // Type error, email must be decoder
+   * ```
    *
    * Example:
    * ```
@@ -442,13 +445,13 @@ export class Decoder<T> {
    * }
    *
    * // typechecks
-   * const decodeUser<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
+   * const decodeUser: Decoder<User> = Decoder.object({name: Decoder.string, email: Decoder.email})
    * decodeUser.run({name: "Jenny", email: "fakemail@fake.com"}) // OK
    * decodeUser.run({nm: "Bad"}) // FAIL
    *
    * // will not typecheck, object must have the same field names as user and
    * // only contain decoders.
-   * const decodeUser<User> = Decoder.object({nem: 'Hi'})
+   * const decodeUser: Decoder<User> = Decoder.object({nem: 'Hi'})
    * ```
    *
    */
