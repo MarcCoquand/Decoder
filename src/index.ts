@@ -139,19 +139,19 @@ export class Decoder<T> {
   };
 
   /**
-   * Create decoders that are dependent on previous results.
+   * Create decoders that is dependent on previous results.
    *
    * Example:
    * ```
-   * const version = Decoder.object({
-   *  version: Decoder.literalNumber(0).or(Decoder.literalNumber(1)),
-   * });
-   * const api = ({ version }: { version: 0 | 1 }): Decoder<{...}> => {
+   * const version = Decoder.field('version, Decoder.number)
+   * const api = ({ version }: { version: number }): Decoder<{...}> => {
    *   switch (version) {
    *      case 0:
    *        return myFirstDecoder;
    *      case 1:
    *        return mySecondDecoder;
+   *      default:
+   *        return Decoder.fail('Version ${version} not supported')
    * }
    * };
    * const versionedApi = version.then(api);
