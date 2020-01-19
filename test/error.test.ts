@@ -2,12 +2,12 @@ import { renderError, DecodeError } from '../src/error';
 
 const mockErrorLevel2: DecodeError = {
   message: 'Key Auth, Decoding errors in object',
-  next: [{ message: 'Key JWT, Not a JWT token' }],
+  next: [{ message: 'Key JWT, Not a JWT token', next: [] }],
 };
 
 const mockError: DecodeError = {
   message: 'Decoding errors in object',
-  next: [{ message: 'Key name, Not a number' }, mockErrorLevel2],
+  next: [{ message: 'Key name, Not a number', next: [] }, mockErrorLevel2],
 };
 
 describe('Error rendering', () => {

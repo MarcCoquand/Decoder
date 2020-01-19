@@ -169,18 +169,9 @@ describe('Methods', () => {
 
     expect(result).toHaveProperty('value', 'hi');
   });
-  it('or', () => {
-    const orDecoder = Decoder.number.or(Decoder.string);
 
-    const result1 = orDecoder.run(5);
-    const result2 = orDecoder.run('hi');
-
-    expect(result1).toHaveProperty('value', 5);
-    expect(result2).toHaveProperty('value', 'hi');
-  });
-
-  it('withDefault', () => {
-    const withDefaultDecoder = Decoder.number.withDefault(0);
+  it('default', () => {
+    const withDefaultDecoder = Decoder.number.default(0);
 
     const result = withDefaultDecoder.run('hi');
     expect(result).toHaveProperty('value', 0);
@@ -203,10 +194,10 @@ describe('Other decoders', () => {
     expect(positiveN.run(-5)).toHaveProperty('type', 'FAIL');
   });
 
-  it('decodes either', () => {
+  it('decodes oneOf', () => {
     const decoder1 = Decoder.number.map(n => ({ type: 'number', value: n }));
     const decoder2 = Decoder.string.map(s => ({ type: 'string', value: s }));
-    const orDecoder = decoder1.or(decoder2);
+    const orDecoder = Decoder.oneOf([decoder1, decoder2]);
 
     const strings = orDecoder.run('hi');
     const ints = orDecoder.run(5);

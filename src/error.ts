@@ -1,9 +1,9 @@
-export type DecodeError = { message: string; next?: DecodeError[] };
+export type DecodeError = { message: string; next: DecodeError[] };
 
 const addSpaces = (pad: number, str: string) => ' '.repeat(pad) + str;
 
 const createRenderer = (pad: number) => (error: DecodeError): string => {
-  if (error.next) {
+  if (error.next.length !== 0) {
     const renderWithPadding = createRenderer(pad + 2);
     const next = error.next.map(el => renderWithPadding(el));
     return `${addSpaces(pad, error.message)}:\n${next.join('\n')}`;
@@ -11,6 +11,11 @@ const createRenderer = (pad: number) => (error: DecodeError): string => {
     return addSpaces(pad, error.message);
   }
 };
+
+export const makeSingleError = (message: string): DecodeError => ({
+  message,
+  next: [],
+});
 
 export const renderError = (error: DecodeError) =>
   `Error(s) decoding data:\n${createRenderer(2)(error)}`;
