@@ -1,4 +1,12 @@
 import { Result } from './result';
+import { DecodeError, renderError } from './error';
+//utils
+const isDate = (d: Date) => !isNaN(d.getDate());
+const isISO = (str: string) => str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
+const isNaturalNumber = (n: number) =>
+  n >= 0.0 && Math.floor(n) === n && n !== Infinity;
+const isStringNumber = (n: string) =>
+  n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 
 /**
  * Decode data and check it's validity using Decoder. Useful when you want to
@@ -26,7 +34,7 @@ import { Result } from './result';
  *
  */
 export class Decoder<T> {
-  private decoder: (data: any) => Result<T, string[]>;
+  private decoder: (data: any) => Result<T, DecodeError>;
 
   /**
    * Transform a decoder. Useful for narrowing data types. For example:
@@ -70,7 +78,6 @@ export class Decoder<T> {
   or = <S>(decoder: Decoder<S>): Decoder<T | S> =>
     new Decoder((data: any) => {
       const res1 = this.decoder(data);
-      let errors: string[] = [];
       switch (res1.get.type) {
         case 'OK':
           return Result.ok(res1.get.value);
@@ -80,14 +87,19 @@ export class Decoder<T> {
             case 'OK':
               return Result.ok(res2.get.value);
             case 'FAIL':
-              errors.push(...res1.get.error);
-              errors.push(...res2.get.error);
-              return Result.fail(errors);
+              const msg: DecodeError = {
+                message: 'Not one of',
+                next: [
+                  { message: `- ${res1.get.error}` },
+                  { message: `- ${res2.get.error}` },
+                ],
+              };
+              return Result.fail(msg);
           }
       }
     });
 
-  private constructor(decoder: (data: any) => Result<T, string[]>) {
+  private constructor(decoder: (data: any) => Result<T, DecodeError>) {
     this.decoder = decoder;
   }
 
@@ -113,12 +125,7 @@ export class Decoder<T> {
   run = (data: any) => {
     const result = this.decoder(data);
 
-    return result.mapError(
-      errors =>
-        `Could not decode data, got error(s): ${errors.join(
-          ','
-        )}. For data: ${data}`
-    ).get;
+    return result.mapError(renderError).get;
   };
 
   /**
@@ -148,16 +155,12 @@ export class Decoder<T> {
         case 'OK':
           return dependentDecoder(result.get.value).decoder(data);
         case 'FAIL':
-          return new Result({ type: 'FAIL', error: result.get.error });
+          return Result.fail(result.get.error);
       }
     });
 
   /**
    * Add an extra predicate to the decoder.
-   *
-   * @param {function} predicate A predicate function to run on the decoded value
-   * @param {string} failureMessage Optional failure message to run in case the
-   *    predicate fails. Provides the data that the predicate checked.
    *
    * Example:
    *
@@ -198,16 +201,13 @@ export class Decoder<T> {
    * ```
    */
   public static number: Decoder<number> = new Decoder((data: any) => {
-    const isStringNumber = (n: string) =>
-      n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
-
     if (typeof data === 'number' && !isNaN(data)) {
       return Result.ok(data);
     } else if (typeof data === 'string' && isStringNumber(data)) {
       const result = parseFloat(data);
       return Result.ok(result);
     } else {
-      return Result.fail([`Not a number`]);
+      return Result.fail({ message: `Not a number` });
     }
   });
 
@@ -226,28 +226,26 @@ export class Decoder<T> {
    * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
    * ```
    */
-  public static date: Decoder<Date> = new Decoder((data: any) => {
-    const isDate = (d: Date) => !isNaN(d.getDate());
-    const isStringNaturalNumber = (n: string) => n.match(/^\d+$/) !== null;
-    const isISO = (str: string) =>
-      str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
-    if (
-      Object.prototype.toString.call(data) === '[object Date]' &&
-      isDate(data)
-    )
-      return Result.ok(data);
-    else if (typeof data === 'string') {
-      if (isStringNaturalNumber(data)) {
-        const date = new Date(data);
-        if (isDate(date)) return Result.ok(date);
-        else return Result.fail([`Not a ISO date or timestamp`]);
-      } else if (isISO(data)) {
-        const date = new Date(data);
-        if (isDate(date)) return Result.ok(date);
-        else return Result.fail([`Not a ISO date or timestamp`]);
-      } else return Result.fail([`Not a ISO date or timestamp`]);
-    } else return Result.fail([`Not a ISO date or timestamp`]);
-  });
+  public static date: Decoder<Date> = Decoder.number
+    .satisfy({
+      predicate: isNaturalNumber,
+      failureMessage: 'Not a ISO date or timestamp',
+    })
+    .map(n => new Date(n))
+    .or(
+      new Decoder((data: any) => {
+        if (
+          Object.prototype.toString.call(data) === '[object Date]' &&
+          isDate(data)
+        )
+          return Result.ok(data);
+        else if (typeof data === 'string' && isISO(data)) {
+          const date = new Date(data);
+          if (isDate(date)) return Result.ok(date);
+          else return Result.fail({ message: `Not a ISO date or timestamp` });
+        } else return Result.fail({ message: `Not a ISO date or timestamp` });
+      })
+    );
 
   /**
    * A decoder that accepts undefined and null. Useful in conjunction with other
@@ -256,61 +254,16 @@ export class Decoder<T> {
    * Example:
    *
    * ```
-   * Decoder.null.run(null) // OK, value is undefined
-   * Decoder.null.run(undefined) // OK, value is undefined
-   * Decoder.null.run(5) // FAIL, value is not null or undefined
-   *
-   * const optionalNumberDecoder = Decoder.number.or(Decoder.empty)
-   * optionalNumberDecoder.run(5) // OK
-   * optionalNumberDecoder.run(undefined) // OK
-   * optionalNumberDecoder.run('hi') // FAIL
+   * Decoder.empty.run(null) // OK, value is undefined
+   * Decoder.empty.run(undefined) // OK, value is undefined
+   * Decoder.empty.run(5) // FAIL, value is not null or undefined
    *```
    */
   public static empty: Decoder<undefined> = new Decoder(data =>
     data === null || data === undefined
       ? Result.ok(undefined)
-      : Result.fail([`Not null or undefined`])
+      : Result.fail({ message: 'Not null or undefined' })
   );
-
-  /**
-   * Decodes the exact string and sets it to a string literal type. Useful for
-   * parsing (discriminated) unions.
-   * ```
-   * type Names = "Jack" | "Sofia"
-   * const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
-   * ```
-   */
-  public static literalString = <T extends string>(str: T): Decoder<T> =>
-    new Decoder(data => {
-      const result = Decoder.string.decoder(data);
-      switch (result.get.type) {
-        case 'OK':
-          if (result.get.value === str) return Result.ok(str);
-          else return Result.fail([`String is not ${str}`]);
-        case 'FAIL':
-          return Result.fail(result.get.error);
-      }
-    });
-
-  /**
-   * Decodes the exact number and sets it to a number literal type. Useful for
-   * parsing (discriminated) unions.
-   * ```
-   * type Versions = Decoder<1 | 2>
-   * const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
-   * ```
-   */
-  public static literalNumber = <T extends number>(number: T): Decoder<T> =>
-    new Decoder(data => {
-      const result = Decoder.number.decoder(data);
-      switch (result.get.type) {
-        case 'OK':
-          if (result.get.value === number) return Result.ok(number);
-          else return Result.fail([`Number is not ${number}`]);
-        case 'FAIL':
-          return Result.fail(result.get.error);
-      }
-    });
 
   /**
    * Decodes a string.
@@ -321,8 +274,28 @@ export class Decoder<T> {
    * ```
    */
   public static string: Decoder<string> = new Decoder((data: any) =>
-    typeof data === 'string' ? Result.ok(data) : Result.fail([`Not a string`])
+    typeof data === 'string'
+      ? Result.ok(data)
+      : Result.fail({ message: `Not a string` })
   );
+
+  /**
+   * Decodes the exact string and sets it to a string literal type. Useful for
+   * parsing unions.
+   *
+   * Example:
+   *
+   * ```
+   * type Names = "Jack" | "Sofia"
+   * const enums: Decoder<Names> = Decoder.literalString("Jack").or(Decoder.literalString("Sofia"))
+   * ```
+   */
+  public static literalString = <T extends string>(str: T): Decoder<T> =>
+    Decoder.string.then(incomingStr =>
+      incomingStr === str
+        ? Decoder.ok(str)
+        : Decoder.fail(`String is not ${str}`)
+    );
 
   /**
    * Takes a decoder and returns an optional decoder
@@ -341,13 +314,29 @@ export class Decoder<T> {
    * Create a decoder that always fails, useful in conjunction with andThen.
    */
   public static fail = <T>(message: string): Decoder<T> =>
-    new Decoder(() => Result.fail([message]));
+    new Decoder(() => Result.fail({ message }));
 
   /**
-   * Create a decoder that always suceeds, useful in conjunction with andThen
+   * Create a decoder that always suceeds and returns value,
+   * useful in conjunction with andThen
    */
   public static ok = <T>(value: T): Decoder<T> =>
     new Decoder(() => Result.ok(value));
+
+  /**
+   * Decodes the exact number and sets it to a number literal type. Useful for
+   * parsing (discriminated) unions.
+   * ```
+   * type Versions = Decoder<1 | 2>
+   * const versionDecoder: Decoder<Versions> = Decoder.literalNumber(1).or(Decoder.literalNumber(2))
+   * ```
+   */
+  public static literalNumber = <T extends number>(number: T): Decoder<T> =>
+    Decoder.number.then(incomingNumber =>
+      incomingNumber === number
+        ? Decoder.ok(number)
+        : Decoder.fail(`Number is not ${number}`)
+    );
 
   /**
    * Create an array decoder given a decoder for the elements.
@@ -361,7 +350,7 @@ export class Decoder<T> {
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
         return Result.merge(data.map(item => decoder.decoder(item)));
-      } else return Result.fail([`Not an array`]);
+      } else return Result.fail({ message: `Not an array` });
     });
 
   /**
@@ -382,33 +371,33 @@ export class Decoder<T> {
         case 'false':
           return Result.ok(false);
         default:
-          return Result.fail([`Not a boolean`]);
+          return Result.fail({ message: `Not a boolean` });
       }
-    } else return Result.fail([`Not a boolean`]);
+    } else return Result.fail({ message: `Not a boolean` });
   });
 
   /**
-   * Decode a specific field in an object using a given decoder.
+   * Decode the value of a specific key in an object using a given decoder. Returns the
+   * value without the key pairing.
+   *
+   * Example:
    *
    * ```
    * const versionDecoder = Decoder.field("version", Decoder.number)
    *
-   * versionDecoder.run({version: 5}) // OK
+   * versionDecoder.run({version: 5}) // OK, 5
    * versionDecoder.run({name: "hi"}) // fail
    * ```
    *
    */
-  public static field = <T>(
-    fieldName: string,
-    decoder: Decoder<T>
-  ): Decoder<T> =>
+  public static field = <T>(key: string, decoder: Decoder<T>): Decoder<T> =>
     new Decoder(data => {
       if (typeof data === 'object' && data !== null) {
-        return decoder
-          .decoder(data[fieldName])
-          .mapError(error => error.map(str => `Field ${fieldName}: ${str}`));
+        return decoder.decoder(data[key]).mapError(error => ({
+          message: `Key ${key}: ${error.message}`,
+        }));
       } else {
-        return Result.fail([`Not an object`]);
+        return Result.fail({ message: 'Not an object' });
       }
     });
 
@@ -416,9 +405,9 @@ export class Decoder<T> {
    * Create a decoder for an object T. Will currently go through each field and
    * collect all the errors but in the future it might fail on first.
    *
-   * @param object [Mapped type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
-   *   an object containing only decoders for each field. For example
-   *    `{name: Decoder.string}`
+   * object is a [Mapped type](https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types),
+   * an object containing only decoders for each field. For example
+   * `{name: Decoder.string}` is accepted but `{name: Decoder.string, email: string}` is rejected.
    *
    * ```
    * interface User {
@@ -446,28 +435,31 @@ export class Decoder<T> {
         const keyValue = Object.entries(object) as [string, Decoder<unknown>][];
 
         let obj: any = {};
-        let errors: string[] = [];
+        let errors: DecodeError[] = [];
         let i: number;
         for (i = 0; i < keyValue.length; i++) {
           const [key, decoder] = keyValue[i];
-          const result = decoder
-            .decoder(data[key])
-            .mapError(strArr =>
-              strArr.map(str => `Expected field ${key}: ${str}`)
-            ).get;
+          const result = decoder.decoder(data[key]).mapError(error => ({
+            message: `- Key ${key}: ${error.message}`,
+            next: error.next,
+          })).get;
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
               break;
             case 'FAIL':
-              errors.push(...result.error);
+              errors.push(result.error);
               break;
           }
         }
         if (errors.length === 0) return Result.ok(obj as T);
-        return Result.fail(errors);
+        const errorMsg: DecodeError = {
+          message: 'Could not decode object',
+          next: errors,
+        };
+        return Result.fail(errorMsg);
       } else {
-        return Result.fail([`Not an object`]);
+        return Result.fail({ message: 'Not an object' });
       }
     });
 }

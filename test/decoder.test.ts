@@ -19,7 +19,7 @@ describe('Number decoder', () => {
         fc.pre(
           typeof anything !== 'number' &&
             typeof anything === 'string' &&
-              (anything as string).match(/^[+-]?\d+(\.\d+)?$/) === null
+            (anything as string).match(/^[+-]?\d+(\.\d+)?$/) === null
         );
         const res = Decoder.number.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
@@ -80,7 +80,8 @@ describe('Date decoder', () => {
       fc.property(fc.anything(), (anything: any) => {
         fc.pre(
           !(anything instanceof Date) &&
-            !(typeof anything === 'string' && isNatural(parseInt(anything)))
+            !(typeof anything === 'string' && isNatural(parseInt(anything))) &&
+            !(typeof anything === 'number' && isNatural(anything))
         );
         const res = Decoder.date.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
