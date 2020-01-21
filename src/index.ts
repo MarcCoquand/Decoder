@@ -69,26 +69,30 @@ export class Decoder<T> {
   private static createOneOf = <T>(
     error: DecodeError,
     decoders: Decoder<T>[]
-  ): Decoder<T> =>
-    new Decoder(data => {
+  ): Decoder<T> => {
+    const recursion = (data: any, error: DecodeError, decoders: Decoder<T>[]): Result<T, DecodeError> => {
       const [next, ...rest] = decoders;
-      if (next) {
+      if (next !== undefined) {
         const result = next.decoder(data).get;
         switch (result.type) {
           case 'OK':
             return Result.ok(result.value);
           case 'FAIL':
-            error.next.push({
+            const newError = ({
               message: `- ${result.error.message}`,
-              next: result.error.next,
-            });
-            return Decoder.createOneOf(error, rest).decoder(data);
+              next: [],
+            }) as DecodeError;
+            
+            return recursion(data, {message: error.message, next: [...error.next, newError]}, rest);
         }
       } else {
         return Result.fail(error);
       }
-    });
+    }
 
+    return new Decoder(data => recursion(data, error, decoders));
+
+  }
   /**
    * Attempt multiple decoders in order until one succeeds. Takes a non-empty
    * array of various decoders. The type signature is informally:
@@ -307,7 +311,7 @@ export class Decoder<T> {
     Decoder.string.then(incomingStr =>
       incomingStr === str
         ? Decoder.ok(str)
-        : Decoder.fail(`String is not ${str}`)
+        : Decoder.fail(`Not ${str}`)
     );
 
   /**
@@ -355,7 +359,7 @@ export class Decoder<T> {
     Decoder.number.then(incomingNumber =>
       incomingNumber === number
         ? Decoder.ok(number)
-        : Decoder.fail(`Number is not ${number}`)
+        : Decoder.fail(`Not ${number}`)
     );
 
   /**

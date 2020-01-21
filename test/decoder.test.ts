@@ -195,20 +195,25 @@ describe('Other decoders', () => {
   });
 
   it('decodes oneOf', () => {
-    const decoder1 = Decoder.number.map(n => ({ type: 'number', value: n }));
-    const decoder2 = Decoder.string.map(s => ({ type: 'string', value: s }));
-    const orDecoder = Decoder.oneOf([decoder1, decoder2]);
+    const marketDecoder = Decoder.oneOf([
+      Decoder.literalString('SV'),
+      Decoder.literalString('US'),
+      Decoder.literalString('AU'),
+    ]);
 
-    const strings = orDecoder.run('hi');
-    const ints = orDecoder.run(5);
-    const bool = orDecoder.run(true);
+    const market = marketDecoder.run('AU');
 
-    expect(strings).toEqual({
+    const marketFail = marketDecoder.run('EN');
+
+    switch(marketFail.type) {
+      case "FAIL": 
+        console.log(marketFail.error)
+    }
+    expect(market).toEqual({
       type: 'OK',
-      value: { type: 'string', value: 'hi' },
+      value: 'AU',
     });
-    expect(ints).toEqual({ type: 'OK', value: { type: 'number', value: 5 } });
-    expect(bool).toHaveProperty('type', 'FAIL');
+    expect(marketFail).toHaveProperty('type', 'FAIL');
   });
 
   it('decodes fields', () => {
