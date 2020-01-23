@@ -80,7 +80,7 @@ export class Decoder<T> {
           case 'FAIL':
             const newError = ({
               message: `- ${result.error.message}`,
-              next: [],
+              next: result.error.next,
             }) as DecodeError;
             
             return recursion(data, {message: error.message, next: [...error.next, newError]}, rest);
