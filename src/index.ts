@@ -139,7 +139,7 @@ export class Decoder<T> {
   run = (data: any) => {
     const result = this.decoder(data);
 
-    return result.mapError(renderError).get;
+    return result.mapError(error => (`${renderError(error)}\nInput data was:\n${data}`)).get;
   };
 
   /**
