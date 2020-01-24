@@ -13,7 +13,6 @@ const mockError: DecodeError = {
 describe('Error rendering', () => {
   it('renders errors', () => {
     const expected =
-      'Error(s) decoding data:\n' +
       '  Decoding errors in object:\n' +
       '    Key name, Not a number\n' +
       '    Key Auth, Decoding errors in object:\n' +

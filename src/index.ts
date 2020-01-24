@@ -1,11 +1,11 @@
 import { Result } from './result';
 import { DecodeError, renderError, makeSingleError } from './error';
 //utils
-const isDate = (d: Date) => !isNaN(d.getDate());
-const isISO = (str: string) => str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
-const isNaturalNumber = (n: number) =>
+const isDate = (d: Date): boolean => !isNaN(d.getDate());
+const isISO = (str: string): boolean => str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
+const isNaturalNumber = (n: number): boolean =>
   n >= 0.0 && Math.floor(n) === n && n !== Infinity;
-const isStringNumber = (n: string) =>
+const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -67,32 +67,24 @@ export class Decoder<T> {
     });
 
   private static createOneOf = <T>(
-    error: DecodeError,
     decoders: Decoder<T>[]
-  ): Decoder<T> => {
-    const recursion = (data: any, error: DecodeError, decoders: Decoder<T>[]): Result<T, DecodeError> => {
-      const [next, ...rest] = decoders;
-      if (next !== undefined) {
-        const result = next.decoder(data).get;
-        switch (result.type) {
+  ): Decoder<T> => new Decoder(data => {
+      let decoder: Decoder<T>;
+      const error = { message: 'Not decoded since', next: [] } as DecodeError
+      for (decoder of decoders) {
+        const result = decoder.decoder(data).get
+        switch(result.type) {
           case 'OK':
-            return Result.ok(result.value);
-          case 'FAIL':
-            const newError = ({
-              message: `- ${result.error.message}`,
+            return Result.ok(result.value)
+          case 'FAIL': 
+            error.next.push({
+              message: `| ${result.error.message}`,
               next: result.error.next,
-            }) as DecodeError;
-            
-            return recursion(data, {message: error.message, next: [...error.next, newError]}, rest);
+            })
         }
-      } else {
-        return Result.fail(error);
       }
-    }
-
-    return new Decoder(data => recursion(data, error, decoders));
-
-  }
+      return Result.fail(error)
+  })
   /**
    * Attempt multiple decoders in order until one succeeds. Takes a non-empty
    * array of various decoders. The type signature is informally:
@@ -114,7 +106,7 @@ export class Decoder<T> {
   public static oneOf = <T extends Decoder<any>>(
     decoders: NonEmptyArray<T>
   ): Decoder<T extends Decoder<infer R> ? R : never> =>
-    Decoder.createOneOf({ message: 'Data is', next: [] }, decoders);
+    Decoder.createOneOf(decoders);
 
   private constructor(decoder: (data: any) => Result<T, DecodeError>) {
     this.decoder = decoder;
@@ -139,7 +131,7 @@ export class Decoder<T> {
   run = (data: any) => {
     const result = this.decoder(data);
 
-    return result.mapError(error => (`${renderError(error)}\nInput data was:\n${data}`)).get;
+    return result.mapError(error => (`Error(s) decoding data:\n${renderError(error)}\n\nInput data was:\n${JSON.stringify(data)}`)).get;
   };
 
   /**
@@ -183,7 +175,7 @@ export class Decoder<T> {
    *  failureMessage: `Not a natural number`
    * })
    * naturalNumber.run(5) // OK, 5
-   * naturalNumber.run(-1) // FAIL
+   * naturalNumber.run(-1) // FAIL, Not a natural number
    * ```
    */
   satisfy = ({
@@ -197,7 +189,7 @@ export class Decoder<T> {
       if (predicate(value)) {
         return Decoder.ok(value);
       } else {
-        const message = failureMessage ? failureMessage : `Predicate failed`;
+        const message = failureMessage ? failureMessage : `Not fulfilled predicate`;
         return Decoder.fail(message);
       }
     });
@@ -225,6 +217,52 @@ export class Decoder<T> {
     }
   });
 
+
+  /**
+   * A decoder for iso dates. Use `Decoder.date` to also support timestamps.
+   * 
+   * Example:
+   * ```
+   * Decoder.date.run(new Date()) // OK
+   * Decoder.date.run("abra") // FAIL
+   * Decoder.date.run("2020-01-13T18:27:35.817Z") // OK
+   * Decoder.date.run(123) // FAIL
+   * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
+   * ```
+   */
+  public static isoDate: Decoder<Date> = 
+    new Decoder((data: any) => {
+      switch (Object.prototype.toString.call(data)) {
+        case '[object Date]':
+          if (isDate(data)) return Result.ok(data);
+          return Result.fail(makeSingleError('Badly formatted date object'));
+        case '[object String]':
+          return isISO(data)
+            ? Result.ok(new Date(data))
+            : Result.fail(makeSingleError(`Not a ISO date`));
+        default:
+          return Result.fail(makeSingleError(`Not a ISO date`));
+      }
+    })
+
+  /**
+   * A decoder for timestamps.    
+   * 
+   * Example:
+   * ```
+   * Decoder.date.run(123) // OK (Timestamp)
+   * Decoder.date.run(new Date()) // FAIL
+   * Decoder.date.run("abra") // FAIL
+   * Decoder.date.run("2020-01-13T18:27:35.817Z") // FAIL
+   * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL
+   * ```
+   */
+  public static timestamp: Decoder<number> = Decoder.number
+      .satisfy({
+        predicate: isNaturalNumber,
+        failureMessage: 'Not a timestamp',
+      })
+
   /**
    * A decoder for dates. Decoding UTC time that is formatted using
    * `toUTCString()` is not supported; Javascript's date parser parses UTC strings
@@ -240,25 +278,8 @@ export class Decoder<T> {
    * ```
    */
   public static date: Decoder<Date> = Decoder.oneOf([
-    Decoder.number
-      .satisfy({
-        predicate: isNaturalNumber,
-        failureMessage: 'Not a ISO date or timestamp',
-      })
-      .map(n => new Date(n)),
-    new Decoder((data: any) => {
-      switch (Object.prototype.toString.call(data)) {
-        case '[object Date]':
-          if (isDate(data)) return Result.ok(data);
-          return Result.fail(makeSingleError('Badly formatted date object'));
-        case '[object String]':
-          return isISO(data)
-            ? Result.ok(new Date(data))
-            : Result.fail(makeSingleError(`Not a ISO date or timestamp`));
-        default:
-          return Result.fail(makeSingleError(`Not a ISO date or timestamp`));
-      }
-    }) as Decoder<Date>,
+    Decoder.timestamp.map(n => new Date(n)),
+    Decoder.isoDate
   ]);
 
   /**
@@ -464,15 +485,15 @@ export class Decoder<T> {
   ): Decoder<T> =>
     new Decoder((data: any) => {
       if (typeof data === 'object' && data !== null) {
-        const keyValue = Object.entries(object) as [string, Decoder<unknown>][];
-
         let obj: any = {};
-        let errors: DecodeError[] = [];
-        let i: number;
-        for (i = 0; i < keyValue.length; i++) {
-          const [key, decoder] = keyValue[i];
-          const result = decoder.decoder(data[key]).mapError(error => ({
-            message: `- Key ${key}: ${error.message}`,
+        let error: DecodeError = {
+          message: 'Could not decode object',
+          next: [],
+        };
+        let key: keyof T
+        for(key in object) {
+          const result = object[key].decoder(data[key]).mapError(error => ({
+            message: `- Key '${key}', ${error.message}`,
             next: error.next,
           })).get;
           switch (result.type) {
@@ -480,16 +501,12 @@ export class Decoder<T> {
               obj[key] = result.value;
               break;
             case 'FAIL':
-              errors.push(result.error);
+              error.next.push(result.error);
               break;
           }
         }
-        if (errors.length === 0) return Result.ok(obj as T);
-        const errorMsg: DecodeError = {
-          message: 'Could not decode object',
-          next: errors,
-        };
-        return Result.fail(errorMsg);
+        if (error.next.length === 0) return Result.ok(obj as T);
+        return Result.fail(error);
       } else {
         return Result.fail(makeSingleError('Not an object'));
       }

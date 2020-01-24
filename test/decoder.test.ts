@@ -205,10 +205,6 @@ describe('Other decoders', () => {
 
     const marketFail = marketDecoder.run('EN');
 
-    switch(marketFail.type) {
-      case "FAIL": 
-        console.log(marketFail.error)
-    }
     expect(market).toEqual({
       type: 'OK',
       value: 'AU',
