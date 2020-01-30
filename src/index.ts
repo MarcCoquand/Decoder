@@ -2,7 +2,8 @@ import { Result } from './result';
 import { DecodeError, renderError, makeSingleError } from './error';
 //utils
 const isDate = (d: Date): boolean => !isNaN(d.getDate());
-const isISO = (str: string): boolean => str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
+const isISO = (str: string): boolean =>
+  str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
 const isNaturalNumber = (n: number): boolean =>
   n >= 0.0 && Math.floor(n) === n && n !== Infinity;
 const isStringNumber = (n: string): boolean =>
@@ -66,25 +67,24 @@ export class Decoder<T> {
       else return Result.ok(value);
     });
 
-  private static createOneOf = <T>(
-    decoders: Decoder<T>[]
-  ): Decoder<T> => new Decoder(data => {
-      let decoder: Decoder<T>;
-      const error = { message: 'Not decoded since', next: [] } as DecodeError
-      for (decoder of decoders) {
-        const result = decoder.decoder(data).get
-        switch(result.type) {
+  private static createOneOf = <T>(decoders: Decoder<T>[]): Decoder<T> =>
+    new Decoder(data => {
+      let next: Decoder<T>;
+      const error = { message: 'Not decoded since', next: [] } as DecodeError;
+      for (next of decoders) {
+        const result = next.decoder(data).get;
+        switch (result.type) {
           case 'OK':
-            return Result.ok(result.value)
-          case 'FAIL': 
+            return Result.ok(result.value);
+          case 'FAIL':
             error.next.push({
               message: `| ${result.error.message}`,
               next: result.error.next,
-            })
+            });
         }
       }
-      return Result.fail(error)
-  })
+      return Result.fail(error);
+    });
   /**
    * Attempt multiple decoders in order until one succeeds. Takes a non-empty
    * array of various decoders. The type signature is informally:
@@ -131,7 +131,12 @@ export class Decoder<T> {
   run = (data: any) => {
     const result = this.decoder(data);
 
-    return result.mapError(error => (`Error(s) decoding data:\n${renderError(error)}\n\nInput data was:\n${JSON.stringify(data)}`)).get;
+    return result.mapError(
+      error =>
+        `Error(s) decoding data:\n${renderError(
+          error
+        )}`
+    ).get;
   };
 
   /**
@@ -189,7 +194,9 @@ export class Decoder<T> {
       if (predicate(value)) {
         return Decoder.ok(value);
       } else {
-        const message = failureMessage ? failureMessage : `Not fulfilled predicate`;
+        const message = failureMessage
+          ? failureMessage
+          : `Not fulfilled predicate`;
         return Decoder.fail(message);
       }
     });
@@ -217,10 +224,9 @@ export class Decoder<T> {
     }
   });
 
-
   /**
    * A decoder for iso dates. Use `Decoder.date` to also support timestamps.
-   * 
+   *
    * Example:
    * ```
    * Decoder.date.run(new Date()) // OK
@@ -230,24 +236,23 @@ export class Decoder<T> {
    * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
    * ```
    */
-  public static isoDate: Decoder<Date> = 
-    new Decoder((data: any) => {
-      switch (Object.prototype.toString.call(data)) {
-        case '[object Date]':
-          if (isDate(data)) return Result.ok(data);
-          return Result.fail(makeSingleError('Badly formatted date object'));
-        case '[object String]':
-          return isISO(data)
-            ? Result.ok(new Date(data))
-            : Result.fail(makeSingleError(`Not a ISO date`));
-        default:
-          return Result.fail(makeSingleError(`Not a ISO date`));
-      }
-    })
+  public static isoDate: Decoder<Date> = new Decoder((data: any) => {
+    switch (Object.prototype.toString.call(data)) {
+      case '[object Date]':
+        if (isDate(data)) return Result.ok(data);
+        return Result.fail(makeSingleError('Badly formatted date object'));
+      case '[object String]':
+        return isISO(data)
+          ? Result.ok(new Date(data))
+          : Result.fail(makeSingleError(`Not a ISO date`));
+      default:
+        return Result.fail(makeSingleError(`Not a ISO date`));
+    }
+  });
 
   /**
-   * A decoder for timestamps.    
-   * 
+   * A decoder for timestamps.
+   *
    * Example:
    * ```
    * Decoder.date.run(123) // OK (Timestamp)
@@ -257,11 +262,10 @@ export class Decoder<T> {
    * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL
    * ```
    */
-  public static timestamp: Decoder<number> = Decoder.number
-      .satisfy({
-        predicate: isNaturalNumber,
-        failureMessage: 'Not a timestamp',
-      })
+  public static timestamp: Decoder<number> = Decoder.number.satisfy({
+    predicate: isNaturalNumber,
+    failureMessage: 'Not a timestamp',
+  });
 
   /**
    * A decoder for dates. Decoding UTC time that is formatted using
@@ -279,7 +283,7 @@ export class Decoder<T> {
    */
   public static date: Decoder<Date> = Decoder.oneOf([
     Decoder.timestamp.map(n => new Date(n)),
-    Decoder.isoDate
+    Decoder.isoDate,
   ]);
 
   /**
@@ -330,9 +334,7 @@ export class Decoder<T> {
    */
   public static literalString = <T extends string>(str: T): Decoder<T> =>
     Decoder.string.then(incomingStr =>
-      incomingStr === str
-        ? Decoder.ok(str)
-        : Decoder.fail(`Not ${str}`)
+      incomingStr === str ? Decoder.ok(str) : Decoder.fail(`Not ${str}`)
     );
 
   /**
@@ -445,7 +447,7 @@ export class Decoder<T> {
       if (typeof data === 'object' && data !== null) {
         return decoder
           .decoder(data[key])
-          .mapError(error => makeSingleError(`Key ${key}: ${error.message}`));
+          .mapError(error => makeSingleError(`Key '${key}', ${error.message}`));
       } else {
         return Result.fail(makeSingleError('Not an object'));
       }
@@ -486,12 +488,12 @@ export class Decoder<T> {
     new Decoder((data: any) => {
       if (typeof data === 'object' && data !== null) {
         let obj: any = {};
-        let error: DecodeError = {
+        const error: DecodeError = {
           message: 'Could not decode object',
           next: [],
         };
-        let key: keyof T
-        for(key in object) {
+        let key: keyof T;
+        for (key in object) {
           const result = object[key].decoder(data[key]).mapError(error => ({
             message: `- Key '${key}', ${error.message}`,
             next: error.next,
