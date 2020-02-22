@@ -10,6 +10,14 @@ const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 type NonEmptyArray<T> = [T, ...T[]];
 
+class ValidationFailedError extends Error {
+  public error: string;
+  constructor(error: string) {
+    super();
+    this.error = error;
+  }
+}
+
 /**
  * Decode data and check it's validity using Decoder. Useful when you want to
  * check that data from clients or other outgoing sources is valid.
@@ -132,11 +140,21 @@ export class Decoder<T> {
     const result = this.decoder(data);
 
     return result.mapError(
-      error =>
-        `Error(s) decoding data:\n${renderError(
-          error
-        )}`
+      error => `Error(s) decoding data:\n${renderError(error)}`
     ).get;
+  };
+
+  /**
+   * Run a decoder on data. It will either succeed and yield the value or throw
+   * an ValidationFailed error
+   */
+  guard = (data: any) => {
+    const result = this.decoder(data).mapError(
+      error => `Error(s) decoding data:\n${renderError(error)}`
+    ).get;
+
+    if (result.type === 'OK') return result.value;
+    else throw new ValidationFailedError(result.error);
   };
 
   /**
