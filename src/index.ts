@@ -10,7 +10,7 @@ const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 type NonEmptyArray<T> = [T, ...T[]];
 
-class ValidationFailedError extends Error {
+export class ValidationFailedError extends Error {
   public error: string;
   constructor(error: string) {
     super();
