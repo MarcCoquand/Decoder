@@ -56,6 +56,7 @@ describe('Date decoder', () => {
       fc.property(fc.date(), date => {
         const res = Decoder.date.run(date);
         const res2 = Decoder.date.run(date.toISOString());
+        const res3 = Decoder.date.run(date.getTime());
         switch (res.type) {
           case 'OK':
             expect(res.value).toEqual(date);
@@ -70,18 +71,24 @@ describe('Date decoder', () => {
           case 'FAIL':
             expect(true).toBe(false);
         }
+        switch (res3.type) {
+          case 'OK':
+            expect(res3.value).toEqual(date);
+            break;
+          case 'FAIL':
+            expect(true).toBe(false);
+        }
       })
     );
   });
   it('does not decode invalid data', () => {
-    const isNatural = (n: number) =>
-      n >= 0 && Math.floor(n) === n && n !== Infinity;
+    const isInteger = (n: number) => Math.floor(n) === n && n !== Infinity;
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
         fc.pre(
           !(anything instanceof Date) &&
-            !(typeof anything === 'string' && isNatural(parseInt(anything))) &&
-            !(typeof anything === 'number' && isNatural(anything))
+            !(typeof anything === 'string' && isInteger(parseInt(anything))) &&
+            !(typeof anything === 'number' && isInteger(anything))
         );
         const res = Decoder.date.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');

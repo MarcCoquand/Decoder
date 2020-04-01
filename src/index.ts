@@ -4,8 +4,7 @@ import { DecodeError, renderError, makeSingleError } from './error';
 const isDate = (d: Date): boolean => !isNaN(d.getDate());
 const isISO = (str: string): boolean =>
   str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
-const isNaturalNumber = (n: number): boolean =>
-  n >= 0.0 && Math.floor(n) === n && n !== Infinity;
+const isInteger = (n: number): boolean => Math.floor(n) === n && n !== Infinity;
 const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 type NonEmptyArray<T> = [T, ...T[]];
@@ -281,7 +280,7 @@ export class Decoder<T> {
    * ```
    */
   public static timestamp: Decoder<number> = Decoder.number.satisfy({
-    predicate: isNaturalNumber,
+    predicate: isInteger,
     failureMessage: 'Not a timestamp',
   });
 
