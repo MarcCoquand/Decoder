@@ -17,5 +17,4 @@ export const makeSingleError = (message: string): DecodeError => ({
   next: [],
 });
 
-export const renderError = createRenderer(2)
-
+export const renderError = createRenderer(2);
