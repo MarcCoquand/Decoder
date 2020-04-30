@@ -1,5 +1,5 @@
 {
-  "version": "2.1.8",
+  "version": "2.1.9",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -41,7 +41,7 @@
   "author": "Marc Coquand",
   "module": "dist/decoders.esm.js",
   "devDependencies": {
-    "@types/jest": "^24.0.25",
+    "@types/jest": "^25.2.1",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
     "coveralls": "^3.0.9",
@@ -49,12 +49,12 @@
     "eslint-config-prettier": "^6.8.0",
     "eslint-plugin-prettier": "^3.1.2",
     "fast-check": "^1.21.0",
-    "husky": "^3.1.0",
-    "prettier": "^1.19.1",
-    "ts-jest": "^24.2.0",
-    "tsdx": "^0.12.0",
+    "husky": "^4.2.5",
+    "prettier": "^2.0.5",
+    "ts-jest": "^25.4.0",
+    "tsdx": "^0.13.2",
     "tslib": "^1.10.0",
-    "typedoc": "^0.15.6",
+    "typedoc": "^0.17.6",
     "typescript": "^3.7.4"
   }
 }

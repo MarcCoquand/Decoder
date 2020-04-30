@@ -55,7 +55,7 @@ export class Decoder<T> {
    * ```
    */
   map = <S>(mapFunction: (arg: T) => S): Decoder<S> =>
-    new Decoder(data => this.decoder(data).map(res => mapFunction(res)));
+    new Decoder((data) => this.decoder(data).map((res) => mapFunction(res)));
 
   /**
    * Sets a default value to the decoder if it fails.
@@ -68,14 +68,14 @@ export class Decoder<T> {
    * ```
    */
   default = <E>(value: T | E) =>
-    new Decoder(data => {
+    new Decoder((data) => {
       const result = this.decoder(data);
       if (Result.isOk(result)) return result;
       else return Result.ok(value);
     });
 
   private static createOneOf = <T>(decoders: Decoder<T>[]): Decoder<T> =>
-    new Decoder(data => {
+    new Decoder((data) => {
       let next: Decoder<T>;
       const error = { message: 'Not decoded since', next: [] } as DecodeError;
       for (next of decoders) {
@@ -139,7 +139,7 @@ export class Decoder<T> {
     const result = this.decoder(data);
 
     return result.mapError(
-      error => `Error(s) decoding data:\n${renderError(error)}`
+      (error) => `Error(s) decoding data:\n${renderError(error)}`
     ).get;
   };
 
@@ -149,7 +149,7 @@ export class Decoder<T> {
    */
   guard = (data: any) => {
     const result = this.decoder(data).mapError(
-      error => `Error(s) decoding data:\n${renderError(error)}`
+      (error) => `Error(s) decoding data:\n${renderError(error)}`
     ).get;
 
     if (result.type === 'OK') return result.value;
@@ -176,7 +176,7 @@ export class Decoder<T> {
    * ```
    */
   then = <S>(dependentDecoder: (res: T) => Decoder<S>): Decoder<S> =>
-    new Decoder(data => {
+    new Decoder((data) => {
       const result = this.decoder(data);
       switch (result.get.type) {
         case 'OK':
@@ -207,7 +207,7 @@ export class Decoder<T> {
     predicate: (arg: T) => boolean;
     failureMessage?: string;
   }): Decoder<T> =>
-    this.then(value => {
+    this.then((value) => {
       if (predicate(value)) {
         return Decoder.ok(value);
       } else {
@@ -299,7 +299,7 @@ export class Decoder<T> {
    * ```
    */
   public static date: Decoder<Date> = Decoder.oneOf([
-    Decoder.timestamp.map(n => new Date(n)),
+    Decoder.timestamp.map((n) => new Date(n)),
     Decoder.isoDate,
   ]);
 
@@ -314,7 +314,7 @@ export class Decoder<T> {
    * Decoder.empty.run(5) // FAIL, value is not null or undefined
    *```
    */
-  public static empty: Decoder<undefined> = new Decoder(data =>
+  public static empty: Decoder<undefined> = new Decoder((data) =>
     data === null || data === undefined
       ? Result.ok(undefined)
       : Result.fail(makeSingleError('Not null or undefined'))
@@ -350,7 +350,7 @@ export class Decoder<T> {
    * ```
    */
   public static literalString = <T extends string>(str: T): Decoder<T> =>
-    Decoder.string.then(incomingStr =>
+    Decoder.string.then((incomingStr) =>
       incomingStr === str ? Decoder.ok(str) : Decoder.fail(`Not ${str}`)
     );
 
@@ -396,7 +396,7 @@ export class Decoder<T> {
    * ```
    */
   public static literalNumber = <T extends number>(number: T): Decoder<T> =>
-    Decoder.number.then(incomingNumber =>
+    Decoder.number.then((incomingNumber) =>
       incomingNumber === number
         ? Decoder.ok(number)
         : Decoder.fail(`Not ${number}`)
@@ -414,7 +414,7 @@ export class Decoder<T> {
   public static array = <T>(decoder: Decoder<T>): Decoder<T[]> =>
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
-        return Result.merge(data.map(item => decoder.decoder(item)));
+        return Result.merge(data.map((item) => decoder.decoder(item)));
       } else return Result.fail(makeSingleError('Not an array'));
     });
 
@@ -428,7 +428,7 @@ export class Decoder<T> {
    * Decoder.boolean.run(1) // fails
    * ```
    */
-  public static boolean: Decoder<boolean> = new Decoder(data => {
+  public static boolean: Decoder<boolean> = new Decoder((data) => {
     switch (typeof data) {
       case 'boolean':
         return Result.ok(data);
@@ -460,11 +460,13 @@ export class Decoder<T> {
    *
    */
   public static field = <T>(key: string, decoder: Decoder<T>): Decoder<T> =>
-    new Decoder(data => {
+    new Decoder((data) => {
       if (typeof data === 'object' && data !== null) {
         return decoder
           .decoder(data[key])
-          .mapError(error => makeSingleError(`Key '${key}', ${error.message}`));
+          .mapError((error) =>
+            makeSingleError(`Key '${key}', ${error.message}`)
+          );
       } else {
         return Result.fail(makeSingleError('Not an object'));
       }
@@ -511,7 +513,7 @@ export class Decoder<T> {
         };
         let key: keyof T;
         for (key in object) {
-          const result = object[key].decoder(data[key]).mapError(error => ({
+          const result = object[key].decoder(data[key]).mapError((error) => ({
             message: `- Key '${key}', ${error.message}`,
             next: error.next,
           })).get;

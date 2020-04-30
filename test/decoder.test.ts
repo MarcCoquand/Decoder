@@ -4,7 +4,7 @@ import * as fc from 'fast-check';
 describe('Number decoder', () => {
   it('decodes numbers', () => {
     fc.assert(
-      fc.property(fc.maxSafeInteger(), n => {
+      fc.property(fc.maxSafeInteger(), (n) => {
         const res = Decoder.number.run(n);
         const resAsNumber = Decoder.number.run(`${n}`);
 
@@ -31,7 +31,7 @@ describe('Number decoder', () => {
 describe('Boolean decoder', () => {
   it('decodes booleans', () => {
     fc.assert(
-      fc.property(fc.boolean(), bool => {
+      fc.property(fc.boolean(), (bool) => {
         const res = Decoder.boolean.run(bool);
         const resAsString = Decoder.boolean.run(`${bool}`);
         expect(res).toEqual({ type: 'OK', value: bool });
@@ -53,7 +53,7 @@ describe('Boolean decoder', () => {
 describe('Date decoder', () => {
   it('decodes dates', () => {
     fc.assert(
-      fc.property(fc.date(), date => {
+      fc.property(fc.date(), (date) => {
         const res = Decoder.date.run(date);
         const res2 = Decoder.date.run(date.toISOString());
         const res3 = Decoder.date.run(date.getTime());
@@ -97,7 +97,7 @@ describe('Date decoder', () => {
   });
   it('does not decode UTC', () => {
     fc.assert(
-      fc.property(fc.date(), date => {
+      fc.property(fc.date(), (date) => {
         const res3 = Decoder.date.run(date.toUTCString());
         expect(res3).toHaveProperty('type', 'FAIL');
       })
@@ -108,7 +108,7 @@ describe('Date decoder', () => {
 describe('String decoder', () => {
   it('decodes strings', () => {
     fc.assert(
-      fc.property(fc.string(), str => {
+      fc.property(fc.string(), (str) => {
         const res = Decoder.string.run(str);
         expect(res).toEqual({ type: 'OK', value: str });
       })
@@ -128,7 +128,7 @@ describe('String decoder', () => {
 describe('Array decoder', () => {
   it('decodes arrays', () => {
     fc.assert(
-      fc.property(fc.array(fc.string()), arr => {
+      fc.property(fc.array(fc.string()), (arr) => {
         const res = Decoder.array(Decoder.string).run(arr);
         expect(res).toEqual({ type: 'OK', value: arr });
       })
@@ -166,12 +166,12 @@ describe('Null decoder', () => {
 
 describe('Methods', () => {
   it('map', () => {
-    const setDecoder = Decoder.array(Decoder.number).map(arr => new Set(arr));
+    const setDecoder = Decoder.array(Decoder.number).map((arr) => new Set(arr));
     const result = setDecoder.run([1, 2, 3]);
     expect(result).toHaveProperty('value', new Set([1, 2, 3]));
   });
   it('then', () => {
-    const thenDecoder = Decoder.number.then(_ => Decoder.ok('hi'));
+    const thenDecoder = Decoder.number.then((_) => Decoder.ok('hi'));
     const result = thenDecoder.run(1);
 
     expect(result).toHaveProperty('value', 'hi');
@@ -195,7 +195,7 @@ describe('Other decoders', () => {
   });
 
   it('decodes predicates', () => {
-    const positiveN = Decoder.number.satisfy({ predicate: n => n > 0 });
+    const positiveN = Decoder.number.satisfy({ predicate: (n) => n > 0 });
 
     expect(positiveN.run(5)).toEqual({ type: 'OK', value: 5 });
     expect(positiveN.run(-5)).toHaveProperty('type', 'FAIL');
@@ -240,7 +240,7 @@ describe('Other decoders', () => {
   });
 
   it('decodes object', () => {
-    const idDecoder = Decoder.number.satisfy({ predicate: n => n > 0 });
+    const idDecoder = Decoder.number.satisfy({ predicate: (n) => n > 0 });
     const userDecoder = Decoder.object({ name: Decoder.string, id: idDecoder });
 
     expect(userDecoder.run({ name: 'hi', id: 5 })).toEqual({
