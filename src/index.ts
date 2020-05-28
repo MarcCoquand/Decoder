@@ -7,7 +7,6 @@ const isISO = (str: string): boolean =>
 const isInteger = (n: number): boolean => Math.floor(n) === n && n !== Infinity;
 const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
-type NonEmptyArray<T> = [T, ...T[]];
 
 export class ValidationFailedError extends Error {
   public error: string;
@@ -93,8 +92,7 @@ export class Decoder<T> {
       return Result.fail(error);
     });
   /**
-   * Attempt multiple decoders in order until one succeeds. Takes a non-empty
-   * array of various decoders. The type signature is informally:
+   * Attempt multiple decoders in order until one succeeds. The type signature is informally:
    * ```
    * oneOf = (decoders: [Decoder<A>, Decoder<B>, ...]) => Decoder<A | B | ...>
    * ```
@@ -111,9 +109,14 @@ export class Decoder<T> {
    * ```
    */
   public static oneOf = <T extends Decoder<any>>(
-    decoders: NonEmptyArray<T>
-  ): Decoder<T extends Decoder<infer R> ? R : never> =>
-    Decoder.createOneOf(decoders);
+    decoders: T[]
+  ): Decoder<T extends Decoder<infer R> ? R : never> => {
+    if (decoders.length === 0)
+      return (Decoder.ok as unknown) as Decoder<
+        T extends Decoder<infer R> ? R : never
+      >;
+    return Decoder.createOneOf(decoders);
+  };
 
   private constructor(decoder: (data: any) => Result<T, DecodeError>) {
     this.decoder = decoder;
