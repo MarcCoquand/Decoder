@@ -1,5 +1,5 @@
 import { Result } from './result';
-import { DecodeError, renderError, makeSingleError } from './error';
+import { DecodeError, makeSingleError } from './error';
 //utils
 const isDate = (d: Date): boolean => !isNaN(d.getDate());
 const isISO = (str: string): boolean =>
@@ -9,8 +9,8 @@ const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 
 export class ValidationFailedError extends Error {
-  public error: string;
-  constructor(error: string) {
+  public error: DecodeError;
+  constructor(error: DecodeError) {
     super();
     this.error = error;
   }
@@ -76,20 +76,19 @@ export class Decoder<T> {
   private static createOneOf = <T>(decoders: Decoder<T>[]): Decoder<T> =>
     new Decoder((data) => {
       let next: Decoder<T>;
-      const error = { message: 'Not decoded since', next: [] } as DecodeError;
+      let errors: DecodeError = [];
       for (next of decoders) {
         const result = next.decoder(data).get;
         switch (result.type) {
           case 'OK':
             return Result.ok(result.value);
           case 'FAIL':
-            error.next.push({
-              message: `| ${result.error.message}`,
-              next: result.error.next,
-            });
+            if (Array.isArray(result.error))
+              errors = [...errors, ...result.error];
+            else errors.push(result.error);
         }
       }
-      return Result.fail(error);
+      return Result.fail(errors as DecodeError);
     });
   /**
    * Attempt multiple decoders in order until one succeeds. The type signature is informally:
@@ -138,22 +137,14 @@ export class Decoder<T> {
    * }
    * ```
    */
-  run = (data: any) => {
-    const result = this.decoder(data);
-
-    return result.mapError(
-      (error) => `Error(s) decoding data:\n${renderError(error)}`
-    ).get;
-  };
+  run = (data: any) => this.decoder(data).get;
 
   /**
    * Run a decoder on data. It will either succeed and yield the value or throw
    * an ValidationFailed error
    */
   guard = (data: any) => {
-    const result = this.decoder(data).mapError(
-      (error) => `Error(s) decoding data:\n${renderError(error)}`
-    ).get;
+    const result = this.decoder(data).get;
 
     if (result.type === 'OK') return result.value;
     else throw new ValidationFailedError(result.error);
@@ -467,9 +458,7 @@ export class Decoder<T> {
       if (typeof data === 'object' && data !== null) {
         return decoder
           .decoder(data[key])
-          .mapError((error) =>
-            makeSingleError(`Key '${key}', ${error.message}`)
-          );
+          .mapError((e) => makeSingleError({ [key]: e }));
       } else {
         return Result.fail(makeSingleError('Not an object'));
       }
@@ -510,27 +499,21 @@ export class Decoder<T> {
     new Decoder((data: any) => {
       if (typeof data === 'object' && data !== null) {
         let obj: any = {};
-        const error: DecodeError = {
-          message: 'Could not decode object',
-          next: [],
-        };
+        let errors: DecodeError = {};
         let key: keyof T;
         for (key in object) {
-          const result = object[key].decoder(data[key]).mapError((error) => ({
-            message: `- Key '${key}', ${error.message}`,
-            next: error.next,
-          })).get;
+          const result = object[key].decoder(data[key]).get;
           switch (result.type) {
             case 'OK':
               obj[key] = result.value;
               break;
             case 'FAIL':
-              error.next.push(result.error);
+              errors[key] = result.error;
               break;
           }
         }
-        if (error.next.length === 0) return Result.ok(obj as T);
-        return Result.fail(error);
+        if (Object.keys(errors).length === 0) return Result.ok(obj as T);
+        return Result.fail(errors);
       } else {
         return Result.fail(makeSingleError('Not an object'));
       }

@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>elm-decoders - v2.1.7</title>
-	<meta name="description" content="">
+	<title>elm-decoders</title>
+	<meta name="description" content="Documentation for elm-decoders">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
 </head>
@@ -13,7 +13,7 @@
 	<div class="tsd-page-toolbar">
 		<div class="container">
 			<div class="table-wrap">
-				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
 					<div class="field">
 						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
 						<input id="tsd-search-field" type="text" />
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">elm-decoders - v2.1.7</a>
+					<a href="index.html" class="title">elm-decoders</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> elm-decoders - v2.1.7</h1>
+			<h1>elm-decoders</h1>
 		</div>
 	</div>
 </header>
@@ -97,7 +97,7 @@
 				<p>Simply run</p>
 				<pre><code><span class="hljs-built_in">npm</span> i elm-decoders</code></pre><p>Or</p>
 				<pre><code>yarn <span class="hljs-keyword">add</span><span class="bash"> elm-decoders</span></code></pre><p>Then at the top of your file add:</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">'elm-decoders'</span>;</code></pre>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;elm-decoders&#x27;</span>;</code></pre>
 				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
 					<h2>Motivation</h2>
 				</a>
@@ -123,7 +123,7 @@
 				<p>Decoder provides us with a few primitive decoders and a few methods to craft
 				new ones. Let&#39;s say we have the following data:</p>
 				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> incomingData: <span class="hljs-built_in">any</span> = {
-  name: <span class="hljs-string">'Nick'</span>,
+  name: <span class="hljs-string">&#x27;Nick&#x27;</span>,
   age: <span class="hljs-number">30</span>,
 };</code></pre>
 				<p>And we have an interface <code>User</code>:</p>
@@ -132,7 +132,7 @@
   age: <span class="hljs-built_in">number</span>;
 }</code></pre>
 				<p>To validate that <code>incomingData</code> is a <code>User</code>, Decoder provides an <code>object</code> primitive.</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">'elm-decoders'</span>;
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;elm-decoders&#x27;</span>;
 
 <span class="hljs-keyword">const</span> userDecoder: Decoder&lt;User&gt; = Decoder.object({
   name: Decoder.string,
@@ -145,15 +145,15 @@
 					meaning is returns <em>either</em> <code>{type: &quot;OK&quot;, value: T}</code> <em>or</em> <code>{type: &quot;FAIL&quot;: error: string}</code>. This means that we are forced to check if the data received is correct or contains an error. Doing so
 				is as simple as a switch case:</p>
 				<pre><code class="language-typescript"><span class="hljs-keyword">switch</span> (result.type) {
-  <span class="hljs-keyword">case</span> <span class="hljs-string">'OK'</span>:
+  <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;OK&#x27;</span>:
     doUserThing(result.value);
-  <span class="hljs-keyword">case</span> <span class="hljs-string">'FAIL'</span>:
+  <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;FAIL&#x27;</span>:
     handleError(result.error);
 }</code></pre>
 				<p>Decoder also provides a few methods for creating new decoders. For example, if
 				we want to create a set decoder, we can use the <code>map</code> method.</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> intSetDecoder: Decoder&lt;Set&lt;<span class="hljs-built_in">number</span>&gt;&gt; = Decoder.array(Decoder.number).map(
-  <span class="hljs-function"><span class="hljs-params">numberArray</span> =&gt;</span> <span class="hljs-keyword">new</span> Set(numberArray)
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> intSetDecoder: Decoder&lt;<span class="hljs-built_in">Set</span>&lt;<span class="hljs-built_in">number</span>&gt;&gt; = Decoder.array(Decoder.number).map(
+  <span class="hljs-function">(<span class="hljs-params">numberArray</span>) =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(numberArray)
 );</code></pre>
 				<p>If there is an error, Decoder will also generate a helpful error report:</p>
 				<pre><code class="language-typescript">&gt; <span class="hljs-keyword">let</span> userDecoder = Decoder.object({
@@ -162,15 +162,8 @@
         jwt: Decoder.string
     })
 })
-&gt; userDecoder.run({wrong: <span class="hljs-string">'hi'</span>, auth: {wrongAgain: <span class="hljs-string">'hi'</span>}})
-{
-  <span class="hljs-keyword">type</span>: <span class="hljs-string">'FAIL'</span>,
-  error: <span class="hljs-string">'Error(s) decoding data:\n'</span> +
-    <span class="hljs-string">'  Could not decode object:\n'</span> +
-    <span class="hljs-string">'    - Key name: Not a string\n'</span> +
-    <span class="hljs-string">'    - Key auth: Could not decode object:\n'</span> +
-    <span class="hljs-string">'      - Key jwt: Not a string'</span>
-}</code></pre>
+&gt; <span class="hljs-built_in">JSON</span>.stringify(userDecoder.run({wrong: <span class="hljs-string">&#x27;hi&#x27;</span>, auth: {wrongAgain: <span class="hljs-string">&#x27;hi&#x27;</span>}}))
+<span class="hljs-string">&#x27;{&quot;type&quot;:&quot;FAIL&quot;,&quot;error&quot;:{&quot;name&quot;:&quot;Not a string&quot;,&quot;auth&quot;:{&quot;jwt&quot;:&quot;Not a string&quot;}}}&#x27;</span></code></pre>
 				<p>This was a brief introduction. From here, please check the API documentation
 				to find out more what you can do and try it for yourself!</p>
 				<a href="#credit" id="credit" style="color: inherit; text-decoration: none;">
@@ -197,19 +190,19 @@
 					<h2>Local Development</h2>
 				</a>
 				<p>Below is a list of commands you will probably find useful.</p>
-				<a href="#codenpm-startcode-or-codeyarn-startcode" id="codenpm-startcode-or-codeyarn-startcode" style="color: inherit; text-decoration: none;">
+				<a href="#npm-start-or-yarn-start" id="npm-start-or-yarn-start" style="color: inherit; text-decoration: none;">
 					<h3><code>npm start</code> or <code>yarn start</code></h3>
 				</a>
 				<p>Runs the project in development/watch mode. Your project will be rebuilt upon changes. TSDX has a special logger for you convenience. Error messages are pretty printed and formatted for compatibility VS Code&#39;s Problems tab.</p>
 				<img src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif" width="600" />
 				<p>Your library will be rebuilt if you make edits.</p>
-				<a href="#codenpm-run-buildcode-or-codeyarn-buildcode" id="codenpm-run-buildcode-or-codeyarn-buildcode" style="color: inherit; text-decoration: none;">
+				<a href="#npm-run-build-or-yarn-build" id="npm-run-build-or-yarn-build" style="color: inherit; text-decoration: none;">
 					<h3><code>npm run build</code> or <code>yarn build</code></h3>
 				</a>
 				<p>Bundles the package to the <code>dist</code> folder.
 				The package is optimized and bundled with Rollup into multiple formats (CommonJS, UMD, and ES Module).</p>
 				<img src="https://user-images.githubusercontent.com/4060187/52168322-a98e5b00-26f6-11e9-8cf6-222d716b75ef.gif" width="600" />
-				<a href="#codenpm-testcode-or-codeyarn-testcode" id="codenpm-testcode-or-codeyarn-testcode" style="color: inherit; text-decoration: none;">
+				<a href="#npm-test-or-yarn-test" id="npm-test-or-yarn-test" style="color: inherit; text-decoration: none;">
 					<h3><code>npm test</code> or <code>yarn test</code></h3>
 				</a>
 				<p>Runs the test watcher (Jest) in an interactive mode.
@@ -222,14 +215,14 @@
 					<li class="globals  ">
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_error_.html">&quot;error&quot;</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_error_.html">&quot;src/error&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_index_.html">&quot;index&quot;</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_index_.html">&quot;src/index&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_result_.html">&quot;result&quot;</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_result_.html">&quot;src/result&quot;</a>
 					</li>
 				</ul>
 			</nav>
@@ -245,57 +238,13 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
-				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
-				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
-				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
 				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
-				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
-				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
-				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
-			</ul>
-			<ul class="tsd-legend">
 				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
 				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
-				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
-				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
-				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>
 		</div>
 	</div>
@@ -305,6 +254,5 @@
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
-<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>

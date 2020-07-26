@@ -120,7 +120,7 @@ we want to create a set decoder, we can use the `map` method.
 
 ```typescript
 const intSetDecoder: Decoder<Set<number>> = Decoder.array(Decoder.number).map(
-  numberArray => new Set(numberArray)
+  (numberArray) => new Set(numberArray)
 );
 ```
 
@@ -133,15 +133,8 @@ If there is an error, Decoder will also generate a helpful error report:
         jwt: Decoder.string
     })
 })
-> userDecoder.run({wrong: 'hi', auth: {wrongAgain: 'hi'}})
-{
-  type: 'FAIL',
-  error: 'Error(s) decoding data:\n' +
-    '  Could not decode object:\n' +
-    '    - Key name: Not a string\n' +
-    '    - Key auth: Could not decode object:\n' +
-    '      - Key jwt: Not a string'
-}
+> JSON.stringify(userDecoder.run({wrong: 'hi', auth: {wrongAgain: 'hi'}}))
+'{"type":"FAIL","error":{"name":"Not a string","auth":{"jwt":"Not a string"}}}'
 ```
 
 This was a brief introduction. From here, please check the API documentation
