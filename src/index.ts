@@ -11,7 +11,7 @@ const isStringNumber = (n: string): boolean =>
 export class ValidationFailedError extends Error {
   public error: DecodeError;
   constructor(error: DecodeError) {
-    super();
+    super(`Error decoding value: ${JSON.stringify(error)}`);
     this.error = error;
   }
 }
