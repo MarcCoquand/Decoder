@@ -2,7 +2,7 @@
 
 A powerful, well tested, data decoder for Typescript.
 
-API Documentation: [Decoder](https://marccoquand.github.io/Decoder/docs/index.html)
+API Documentation: [Decoder](https://marccoquand.github.io/Decoder/modules/_index_.html)
 Github: [Decoder](https://github.com/MarcCoquand/Decoder)
 
 [![Coverage Status](https://coveralls.io/repos/github/MarcCoquand/Decoder/badge.svg?branch=master)](https://coveralls.io/github/MarcCoquand/Decoder?branch=master)
