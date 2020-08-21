@@ -105,6 +105,57 @@ describe('Date decoder', () => {
   });
 });
 
+describe('Dict decoder', () => {
+  it('Decodes the inner value', () => {
+    fc.assert(
+      fc.property(
+        fc.dictionary(
+          fc.string().filter((str) => str.length === 0),
+          fc.integer()
+        ),
+        (objects) => {
+          const res = Decoder.dict(Decoder.number).guard(objects);
+          for (const key in res) {
+            expect(res[key]).toEqual(objects[key]);
+          }
+        }
+      )
+    );
+  });
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(
+        fc.dictionary(
+          fc.string().filter((str) => str.length === 0),
+          fc.integer()
+        ),
+        (objects) => {
+          fc.pre(Object.values(objects).length !== 0);
+          const res: any = Decoder.dict(
+            Decoder.object({ uhoh: Decoder.number })
+          ).run(objects);
+
+          expect(res).toHaveProperty('type', 'FAIL');
+          expect(Object.values(res.error).length).toEqual(
+            Object.values(objects).length
+          );
+        }
+      )
+    );
+  });
+});
+
+describe('Any decoder', () => {
+  it('accepts anything', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything) => {
+        const res = Decoder.any.guard(anything);
+        expect(res).toEqual(anything);
+      })
+    );
+  });
+});
+
 describe('String decoder', () => {
   it('decodes strings', () => {
     fc.assert(

@@ -68,7 +68,7 @@
 					<h1>Decoder</h1>
 				</a>
 				<p>A powerful, well tested, data decoder for Typescript.</p>
-				<p>API Documentation: <a href="https://marccoquand.github.io/Decoder/classes/_index_.decoder.html">Decoder</a>
+				<p>API Documentation: <a href="https://marccoquand.github.io/Decoder/docs/index.html">Decoder</a>
 				Github: <a href="https://github.com/MarcCoquand/Decoder">Decoder</a></p>
 				<p><a href="https://coveralls.io/github/MarcCoquand/Decoder?branch=master"><img src="https://coveralls.io/repos/github/MarcCoquand/Decoder/badge.svg?branch=master" alt="Coverage Status"></a>
 				<a href="https://travis-ci.org/MarcCoquand/Decoder"><img src="https://travis-ci.org/MarcCoquand/Decoder.svg?branch=master" alt="Build Status"></a></p>
@@ -97,7 +97,7 @@
 				<p>Simply run</p>
 				<pre><code><span class="hljs-built_in">npm</span> i elm-decoders</code></pre><p>Or</p>
 				<pre><code>yarn <span class="hljs-keyword">add</span><span class="bash"> elm-decoders</span></code></pre><p>Then at the top of your file add:</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;elm-decoders&#x27;</span>;</code></pre>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">'elm-decoders'</span>;</code></pre>
 				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
 					<h2>Motivation</h2>
 				</a>
@@ -123,7 +123,7 @@
 				<p>Decoder provides us with a few primitive decoders and a few methods to craft
 				new ones. Let&#39;s say we have the following data:</p>
 				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> incomingData: <span class="hljs-built_in">any</span> = {
-  name: <span class="hljs-string">&#x27;Nick&#x27;</span>,
+  name: <span class="hljs-string">'Nick'</span>,
   age: <span class="hljs-number">30</span>,
 };</code></pre>
 				<p>And we have an interface <code>User</code>:</p>
@@ -132,7 +132,7 @@
   age: <span class="hljs-built_in">number</span>;
 }</code></pre>
 				<p>To validate that <code>incomingData</code> is a <code>User</code>, Decoder provides an <code>object</code> primitive.</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;elm-decoders&#x27;</span>;
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Decoder } <span class="hljs-keyword">from</span> <span class="hljs-string">'elm-decoders'</span>;
 
 <span class="hljs-keyword">const</span> userDecoder: Decoder&lt;User&gt; = Decoder.object({
   name: Decoder.string,
@@ -145,15 +145,15 @@
 					meaning is returns <em>either</em> <code>{type: &quot;OK&quot;, value: T}</code> <em>or</em> <code>{type: &quot;FAIL&quot;: error: string}</code>. This means that we are forced to check if the data received is correct or contains an error. Doing so
 				is as simple as a switch case:</p>
 				<pre><code class="language-typescript"><span class="hljs-keyword">switch</span> (result.type) {
-  <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;OK&#x27;</span>:
+  <span class="hljs-keyword">case</span> <span class="hljs-string">'OK'</span>:
     doUserThing(result.value);
-  <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;FAIL&#x27;</span>:
+  <span class="hljs-keyword">case</span> <span class="hljs-string">'FAIL'</span>:
     handleError(result.error);
 }</code></pre>
 				<p>Decoder also provides a few methods for creating new decoders. For example, if
 				we want to create a set decoder, we can use the <code>map</code> method.</p>
-				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> intSetDecoder: Decoder&lt;<span class="hljs-built_in">Set</span>&lt;<span class="hljs-built_in">number</span>&gt;&gt; = Decoder.array(Decoder.number).map(
-  <span class="hljs-function">(<span class="hljs-params">numberArray</span>) =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(numberArray)
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> intSetDecoder: Decoder&lt;Set&lt;<span class="hljs-built_in">number</span>&gt;&gt; = Decoder.array(Decoder.number).map(
+  <span class="hljs-function">(<span class="hljs-params">numberArray</span>) =&gt;</span> <span class="hljs-keyword">new</span> Set(numberArray)
 );</code></pre>
 				<p>If there is an error, Decoder will also generate a helpful error report:</p>
 				<pre><code class="language-typescript">&gt; <span class="hljs-keyword">let</span> userDecoder = Decoder.object({
@@ -162,8 +162,8 @@
         jwt: Decoder.string
     })
 })
-&gt; <span class="hljs-built_in">JSON</span>.stringify(userDecoder.run({wrong: <span class="hljs-string">&#x27;hi&#x27;</span>, auth: {wrongAgain: <span class="hljs-string">&#x27;hi&#x27;</span>}}))
-<span class="hljs-string">&#x27;{&quot;type&quot;:&quot;FAIL&quot;,&quot;error&quot;:{&quot;name&quot;:&quot;Not a string&quot;,&quot;auth&quot;:{&quot;jwt&quot;:&quot;Not a string&quot;}}}&#x27;</span></code></pre>
+&gt; <span class="hljs-built_in">JSON</span>.stringify(userDecoder.run({wrong: <span class="hljs-string">'hi'</span>, auth: {wrongAgain: <span class="hljs-string">'hi'</span>}}))
+<span class="hljs-string">'{"type":"FAIL","error":{"name":"Not a string","auth":{"jwt":"Not a string"}}}'</span></code></pre>
 				<p>This was a brief introduction. From here, please check the API documentation
 				to find out more what you can do and try it for yourself!</p>
 				<a href="#credit" id="credit" style="color: inherit; text-decoration: none;">
@@ -216,13 +216,13 @@
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_error_.html">&quot;src/error&quot;</a>
+						<a href="modules/_error_.html">&quot;error&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_index_.html">&quot;src/index&quot;</a>
+						<a href="modules/_index_.html">&quot;index&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_result_.html">&quot;src/result&quot;</a>
+						<a href="modules/_result_.html">&quot;result&quot;</a>
 					</li>
 				</ul>
 			</nav>
@@ -254,5 +254,6 @@
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>

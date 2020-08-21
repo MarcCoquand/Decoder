@@ -1,5 +1,5 @@
 import { Result } from './result';
-import { DecodeError, makeSingleError } from './error';
+import { DecodeError, makeSingleError, formatIndex } from './error';
 //utils
 const isDate = (d: Date): boolean => !isNaN(d.getDate());
 const isISO = (str: string): boolean =>
@@ -11,7 +11,7 @@ const isStringNumber = (n: string): boolean =>
 export class ValidationFailedError extends Error {
   public error: DecodeError;
   constructor(error: DecodeError) {
-    super(`Error decoding value: ${JSON.stringify(error)}`);
+    super(`Decoding value failed: ${JSON.stringify(error)}`);
     this.error = error;
   }
 }
@@ -83,9 +83,9 @@ export class Decoder<T> {
           case 'OK':
             return Result.ok(result.value);
           case 'FAIL':
-            if (Array.isArray(result.error))
-              errors = [...errors, ...result.error];
-            else errors.push(result.error);
+            if (Array.isArray(result.error) && Array.isArray(errors))
+              errors = [...errors, ...result.error] as DecodeError;
+            else (errors as DecodeError[]).push(result.error);
         }
       }
       return Result.fail(errors as DecodeError);
@@ -226,12 +226,12 @@ export class Decoder<T> {
     switch (typeof data) {
       case 'number':
         if (!isNaN(data)) return Result.ok(data);
-        return Result.fail(makeSingleError('Not a number'));
+        return Result.fail(makeSingleError('Not a number', data));
       case 'string':
         if (isStringNumber(data)) return Result.ok(parseFloat(data));
-        return Result.fail(makeSingleError('Not a number'));
+        return Result.fail(makeSingleError('Not a number', data));
       default:
-        return Result.fail(makeSingleError('Not a number'));
+        return Result.fail(makeSingleError('Not a number', data));
     }
   });
 
@@ -251,13 +251,15 @@ export class Decoder<T> {
     switch (Object.prototype.toString.call(data)) {
       case '[object Date]':
         if (isDate(data)) return Result.ok(data);
-        return Result.fail(makeSingleError('Badly formatted date object'));
+        return Result.fail(
+          makeSingleError('Badly formatted date object', data)
+        );
       case '[object String]':
         return isISO(data)
           ? Result.ok(new Date(data))
-          : Result.fail(makeSingleError(`Not a ISO date`));
+          : Result.fail(makeSingleError(`Not a ISO date`, data));
       default:
-        return Result.fail(makeSingleError(`Not a ISO date`));
+        return Result.fail(makeSingleError(`Not a ISO date`, data));
     }
   });
 
@@ -311,7 +313,7 @@ export class Decoder<T> {
   public static empty: Decoder<undefined> = new Decoder((data) =>
     data === null || data === undefined
       ? Result.ok(undefined)
-      : Result.fail(makeSingleError('Not null or undefined'))
+      : Result.fail(makeSingleError('Not null or undefined', data))
   );
 
   /**
@@ -326,7 +328,7 @@ export class Decoder<T> {
   public static string: Decoder<string> = new Decoder((data: any) =>
     typeof data === 'string'
       ? Result.ok(data)
-      : Result.fail(makeSingleError('Not a string'))
+      : Result.fail(makeSingleError('Not a string', data))
   );
 
   /**
@@ -367,7 +369,7 @@ export class Decoder<T> {
    * Create a decoder that always fails with a message.
    */
   public static fail = <T>(message: string): Decoder<T> =>
-    new Decoder(() => Result.fail(makeSingleError(message)));
+    new Decoder(() => Result.fail({ error: message }));
 
   /**
    * Create a decoder that always suceeds and returns T.
@@ -408,8 +410,11 @@ export class Decoder<T> {
   public static array = <T>(decoder: Decoder<T>): Decoder<T[]> =>
     new Decoder((data: any) => {
       if (Array.isArray(data)) {
-        return Result.merge(data.map((item) => decoder.decoder(item)));
-      } else return Result.fail(makeSingleError('Not an array'));
+        return Result.merge(
+          data.map((item) => decoder.decoder(item)),
+          (index, e) => formatIndex(index, e)
+        );
+      } else return Result.fail(makeSingleError('Not an array', data));
     });
 
   /**
@@ -433,10 +438,10 @@ export class Decoder<T> {
           case 'false':
             return Result.ok(false);
           default:
-            return Result.fail(makeSingleError('Not a boolean'));
+            return Result.fail(makeSingleError('Not a boolean', data));
         }
       default: {
-        return Result.fail(makeSingleError('Not a boolean'));
+        return Result.fail(makeSingleError('Not a boolean', data));
       }
     }
   });
@@ -456,11 +461,53 @@ export class Decoder<T> {
   public static field = <T>(key: string, decoder: Decoder<T>): Decoder<T> =>
     new Decoder((data) => {
       if (typeof data === 'object' && data !== null) {
-        return decoder
-          .decoder(data[key])
-          .mapError((e) => makeSingleError({ [key]: e }));
+        return decoder.decoder(data[key]).mapError((e) => ({ [key]: e }));
       } else {
-        return Result.fail(makeSingleError('Not an object'));
+        return Result.fail(makeSingleError('Not an object', data));
+      }
+    });
+
+  /**
+   * A decoder that accepts anything.
+   */
+  public static any: Decoder<unknown> = new Decoder((data) => Result.ok(data));
+
+  /**
+   * Decode values of an object where the keys are unknown.
+   *
+   * Example:
+   * ```
+   * const userDecoder = Decoder.object({age: Decoder.number})
+   * const usersDecoder = Decoder.dict(userDecoder)
+   *
+   * usersDecoder.run({emelie: {age: 32}, bob: {age: 50}}) // OK, {emelie: {age: 32}, bob: {age: 50}}
+   * usersDecoder.run({name: 'emelie', age: 32}) // fail
+   * ```
+   *
+   */
+  public static dict = <T>(
+    decoder: Decoder<T>
+  ): Decoder<{ [key: string]: T }> =>
+    new Decoder((data) => {
+      if (typeof data === 'object' && data !== null) {
+        let decoded: any = {};
+        let errors: DecodeError = {};
+        for (const key in data) {
+          const result = decoder.run(data[key]);
+          switch (result.type) {
+            case 'OK':
+              decoded[key] = result.value;
+              break;
+            case 'FAIL':
+              errors[key] = result.error;
+              break;
+          }
+        }
+        if (Object.keys(errors).length === 0)
+          return Result.ok(decoded as { [key: string]: T });
+        return Result.fail(errors);
+      } else {
+        return Result.fail(makeSingleError('Not an object', data));
       }
     });
 
@@ -515,7 +562,7 @@ export class Decoder<T> {
         if (Object.keys(errors).length === 0) return Result.ok(obj as T);
         return Result.fail(errors);
       } else {
-        return Result.fail(makeSingleError('Not an object'));
+        return Result.fail(makeSingleError('Not an object', data));
       }
     });
 }

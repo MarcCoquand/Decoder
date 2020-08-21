@@ -30,20 +30,31 @@ export class Result<T, E> {
     }
   };
 
-  static merge = <T, E>(values: Result<T, E>[]): Result<T[], E> =>
-    values.reduce((p, c) => {
+  static merge = <T, E>(
+    values: Result<T, E>[],
+    addErrorIndex: (index: number, error: E) => E
+  ): Result<T[], E[]> =>
+    values.reduce((p, c, i) => {
       switch (p.get.type) {
         case 'OK':
           switch (c.get.type) {
             case 'OK':
               return Result.ok([...p.get.value, c.get.value]);
             case 'FAIL':
-              return Result.fail(c.get.error);
+              return Result.fail([addErrorIndex(i, c.get.error)]);
           }
         case 'FAIL':
-          return Result.fail(p.get.error);
+          switch (c.get.type) {
+            case 'OK':
+              return Result.fail(p.get.error);
+            case 'FAIL':
+              return Result.fail([
+                ...p.get.error,
+                addErrorIndex(i, c.get.error),
+              ]);
+          }
       }
-    }, Result.ok([] as T[]));
+    }, Result.ok([] as T[]) as Result<T[], E[]>);
 
   static ok = <T, E>(value: T): Result<T, E> =>
     new Result({ type: 'OK', value });
