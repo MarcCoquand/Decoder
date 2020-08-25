@@ -8,6 +8,7 @@ const isInteger = (n: number): boolean => Math.floor(n) === n && n !== Infinity;
 const isStringNumber = (n: string): boolean =>
   n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
 
+export { DecodeError };
 export class ValidationFailedError extends Error {
   public error: DecodeError;
   constructor(error: DecodeError) {
