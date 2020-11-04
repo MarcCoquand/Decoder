@@ -301,20 +301,35 @@ export class Decoder<T> {
   ]);
 
   /**
-   * A decoder that accepts undefined and null. Useful in conjunction with other
-   * decoders.
+   * A decoder that accepts undefined.
    *
    * Example:
    * ```
-   * Decoder.empty.run(null) // OK, value is undefined
-   * Decoder.empty.run(undefined) // OK, value is undefined
-   * Decoder.empty.run(5) // FAIL, value is not null or undefined
+   * Decoder.undefined.run(null) // FAIL
+   * Decoder.undefined.run(5) // FAIL
+   * Decoder.undefined.run(undefined) // OK
    *```
    */
-  public static empty: Decoder<undefined> = new Decoder((data) =>
-    data === null || data === undefined
-      ? Result.ok(undefined)
-      : Result.fail(makeSingleError('Not null or undefined', data))
+  public static undefined: Decoder<undefined> = new Decoder((data) =>
+    data === undefined
+      ? Result.ok(data)
+      : Result.fail(makeSingleError('Not undefined', data))
+  );
+
+  /**
+   * A decoder that accepts undefined.
+   *
+   * Example:
+   * ```
+   * Decoder.null.run(undefined) // FAIL
+   * Decoder.null.run(5) // FAIL
+   * Decoder.null.run(null) // OK
+   *```
+   */
+  public static null: Decoder<null> = new Decoder((data) =>
+    data === null
+      ? Result.ok(data)
+      : Result.fail(makeSingleError('Not null', data))
   );
 
   /**
@@ -364,7 +379,11 @@ export class Decoder<T> {
    * ```
    */
   public static optional = <T>(decoder: Decoder<T>): Decoder<T | undefined> =>
-    Decoder.oneOf([Decoder.empty, decoder]);
+    Decoder.oneOf([
+      Decoder.undefined,
+      Decoder.null.map((_) => undefined),
+      decoder,
+    ]);
 
   /**
    * Create a decoder that always fails with a message.

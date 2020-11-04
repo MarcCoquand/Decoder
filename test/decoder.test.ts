@@ -197,18 +197,33 @@ describe('Array decoder', () => {
 });
 
 describe('Null decoder', () => {
-  it('decodes null and undefined', () => {
-    const res2 = Decoder.empty.run(undefined);
-    const res3 = Decoder.empty.run(null);
-    expect(res2).toEqual({ type: 'OK', value: undefined });
-    expect(res3).toEqual({ type: 'OK', value: undefined });
+  it('decodes null', () => {
+    const result = Decoder.null.run(null);
+    expect(result).toEqual({ type: 'OK', value: null });
   });
 
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {
-        fc.pre(anything !== null && anything !== undefined);
-        const res = Decoder.empty.run(anything);
+        fc.pre(anything !== null);
+        const res = Decoder.null.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
+describe('Undefined decoder', () => {
+  it('decodes undefined', () => {
+    const result = Decoder.undefined.run(undefined);
+    expect(result).toEqual({ type: 'OK', value: undefined });
+  });
+
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(anything !== undefined);
+        const res = Decoder.undefined.run(anything);
         expect(res).toHaveProperty('type', 'FAIL');
       })
     );
