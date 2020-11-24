@@ -14,6 +14,7 @@ export class ValidationFailedError extends Error {
   constructor(error: DecodeError) {
     super(`Decoding value failed: ${JSON.stringify(error)}`);
     this.error = error;
+    Object.setPrototypeOf(this, ValidationFailedError.prototype);
   }
 }
 
