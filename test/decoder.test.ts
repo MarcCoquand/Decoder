@@ -145,6 +145,17 @@ describe('Dict decoder', () => {
   });
 });
 
+describe('Sequence', () => {
+  it('collects failures and successes', () => {
+    const array = [1, 2, 3, 'hello'];
+
+    const { successful, failed } = Decoder.number.sequence(array);
+
+    expect(successful).toEqual([1, 2, 3]);
+    expect(failed).toEqual(['hello']);
+  });
+});
+
 describe('Any decoder', () => {
   it('accepts anything', () => {
     fc.assert(

@@ -494,6 +494,33 @@ export class Decoder<T> {
   public static any: Decoder<unknown> = new Decoder((data) => Result.ok(data));
 
   /**
+   * run a decoder on each item in an array, collecting the amount of successful and failed decodings.
+   *
+   * ```
+   * example:
+   *
+   * Decoder.number.sequence([1,3,4,"hello"]) // => {successful: [1,2,3], failed: ["hello"]}
+   * ```
+   */
+  public sequence = (
+    array: unknown[]
+  ): { successful: T[]; failed: unknown[] } => {
+    const failed = [];
+    const successful = [];
+    for (const item of array) {
+      const result = this.run(item);
+      switch (result.type) {
+        case 'OK':
+          successful.push(result.value);
+          break;
+        case 'FAIL':
+          failed.push(item);
+      }
+    }
+    return { failed, successful };
+  };
+
+  /**
    * Decode values of an object where the keys are unknown.
    *
    * Example:
