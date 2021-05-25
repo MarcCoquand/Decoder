@@ -13,6 +13,11 @@ describe('Number decoder', () => {
       })
     );
   });
+  it('decodes floating numbers', () => {
+    const res = Decoder.number.run('-4.44089e-16');
+
+    expect(res).toEqual({ type: 'OK', value: -4.44089e-16 });
+  });
   it('does not decode invalid data', () => {
     fc.assert(
       fc.property(fc.anything(), (anything: any) => {

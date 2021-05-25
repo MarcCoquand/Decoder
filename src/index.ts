@@ -5,8 +5,12 @@ const isDate = (d: Date): boolean => !isNaN(d.getDate());
 const isISO = (str: string): boolean =>
   str.match(/(\d{4})-(\d{2})-(\d{2})/) !== null;
 const isInteger = (n: number): boolean => Math.floor(n) === n && n !== Infinity;
+var numberReSnippet =
+  '(?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity))';
+var matchOnlyNumberRe = new RegExp('^(' + numberReSnippet + ')$');
+
 const isStringNumber = (n: string): boolean =>
-  n.length !== 0 && n.match(/^[+-]?\d+(\.\d+)?$/) !== null;
+  n.length !== 0 && n.match(matchOnlyNumberRe) !== null;
 
 export { DecodeError };
 export class ValidationFailedError extends Error {
