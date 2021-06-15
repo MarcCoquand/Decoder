@@ -322,7 +322,7 @@ export class Decoder<T> {
   );
 
   /**
-   * A decoder that accepts undefined.
+   * A decoder that accepts null.
    *
    * Example:
    * ```
@@ -335,6 +335,22 @@ export class Decoder<T> {
     data === null
       ? Result.ok(data)
       : Result.fail(makeSingleError('Not null', data))
+  );
+  /**
+   * A decoder that accepts a Buffer.
+   *
+   * Example:
+   * ```
+   * Decoder.null.run(undefined) // FAIL
+   * Decoder.null.run(5) // FAIL
+   * Decoder.null.run(Buffer.from('Hello world')) // OK
+   * Decoder.null.run(<Buffer 68 65 6c 6c 6f>) // OK
+   *```
+   */
+  public static buffer: Decoder<Buffer> = new Decoder((data) =>
+    Buffer.isBuffer(data)
+      ? Result.ok(data)
+      : Result.fail(makeSingleError('Not Buffer', data))
   );
 
   /**
