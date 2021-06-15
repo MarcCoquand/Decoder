@@ -246,6 +246,24 @@ describe('Undefined decoder', () => {
   });
 });
 
+describe('Buffer decoder', () => {
+  it('decodes Buffer', () => {
+    const data = Buffer.from('hello');
+    const result = Decoder.buffer.run(data);
+    expect(result).toEqual({ type: 'OK', value: data });
+  });
+
+  it('does not decode invalid data', () => {
+    fc.assert(
+      fc.property(fc.anything(), (anything: any) => {
+        fc.pre(!Buffer.isBuffer(anything));
+        const res = Decoder.buffer.run(anything);
+        expect(res).toHaveProperty('type', 'FAIL');
+      })
+    );
+  });
+});
+
 describe('Methods', () => {
   it('map', () => {
     const setDecoder = Decoder.array(Decoder.number).map((arr) => new Set(arr));
