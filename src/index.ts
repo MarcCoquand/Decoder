@@ -246,11 +246,11 @@ export class Decoder<T> {
    *
    * Example:
    * ```
-   * Decoder.date.run(new Date()) // OK
-   * Decoder.date.run("abra") // FAIL
-   * Decoder.date.run("2020-01-13T18:27:35.817Z") // OK
-   * Decoder.date.run(123) // FAIL
-   * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
+   * Decoder.isoDate.run(new Date()) // OK
+   * Decoder.isoDate.run("abra") // FAIL
+   * Decoder.isoDate.run("2020-01-13T18:27:35.817Z") // OK
+   * Decoder.isoDate.run(123) // FAIL
+   * Decoder.isoDate.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL, format is not supported
    * ```
    */
   public static isoDate: Decoder<Date> = new Decoder((data: any) => {
@@ -274,11 +274,11 @@ export class Decoder<T> {
    *
    * Example:
    * ```
-   * Decoder.date.run(123) // OK (Timestamp)
-   * Decoder.date.run(new Date()) // FAIL
-   * Decoder.date.run("abra") // FAIL
-   * Decoder.date.run("2020-01-13T18:27:35.817Z") // FAIL
-   * Decoder.date.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL
+   * Decoder.timestamp.run(123) // OK (Timestamp)
+   * Decoder.timestamp.run(new Date()) // FAIL
+   * Decoder.timestamp.run("abra") // FAIL
+   * Decoder.timestamp.run("2020-01-13T18:27:35.817Z") // FAIL
+   * Decoder.timestamp.run("Mon, 13 Jan 2020 18:28:05 GMT") // FAIL
    * ```
    */
   public static timestamp: Decoder<number> = Decoder.number.satisfy({
@@ -341,10 +341,10 @@ export class Decoder<T> {
    *
    * Example:
    * ```
-   * Decoder.null.run(undefined) // FAIL
-   * Decoder.null.run(5) // FAIL
-   * Decoder.null.run(Buffer.from('Hello world')) // OK
-   * Decoder.null.run(<Buffer 68 65 6c 6c 6f>) // OK
+   * Decoder.buffer.run(undefined) // FAIL
+   * Decoder.buffer.run(5) // FAIL
+   * Decoder.buffer.run(Buffer.from('Hello world')) // OK
+   * Decoder.buffer.run(<Buffer 68 65 6c 6c 6f>) // OK
    *```
    */
   public static buffer: Decoder<Buffer> = new Decoder((data) =>
